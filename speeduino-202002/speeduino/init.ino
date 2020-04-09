@@ -1794,7 +1794,42 @@ void setPinMapping(byte boardID)
 
       #endif
       break;
-    
+
+    #if defined(CORE_TEENSY35)
+    case 57:
+          //Pin mappings as per the teensy 3.5 X3V0.1 board shield
+      //firing order 1234
+//      pinInjector1 = 5; // HW INJ1
+//      pinInjector2 = 4; // HW INJ2
+//      pinInjector3 = 3; // HW INJ3
+//      pinInjector4 = 2; // HW INJ4
+      // firing order 1342
+      pinInjector1 = 5; // HW INJ1
+      pinInjector2 = 3; // HW INJ3
+      pinInjector3 = 2; // HW INJ4
+      pinInjector4 = 4; // HW INJ2
+
+      pinCoil1 = 14;  // wasted spark HW 1&4 (orig)
+      pinCoil2 = 15;  // wasted spark HW 3&2 (orig)
+//      pinCoil1 = 15;  // wasted spark HW 1&4 
+//      pinCoil2 = 14;  // wasted spark HW 3&2
+      pinTrigger = 32;  //Dig in CKP pin
+      pinTrigger2 = 39; //Dig in Cam Sensor pin
+      pinTPS = A6;     //Analog- TPS input pin - not used with Ford Barra
+      pinMAP = A9;     //Analog- MAP sensor pin
+      pinIAT = A4;     //Analog- IAT sensor pin
+      pinCLT = A5;     //Analog- CLT sensor pin
+      pinO2 =  A8;      //Analog- O2 sensor pin
+      pinBat = A12;     //Analog- Battery reference voltage pin
+      pinTachOut = 25;  //Tacho output pin
+      pinIdle1 = 9;    //Single wire idle control
+      pinIdle2 = 10;    //2 wire idle control
+      pinFuelPump = 24; //Fuel pump output
+      pinFan = 11;      //Pin for the fan output
+
+      break;
+    #endif 
+
    #if defined(ARDUINO_BLACK_F407VE)
     case 60:
        //Pin definitions for experimental board Tjeerd 
