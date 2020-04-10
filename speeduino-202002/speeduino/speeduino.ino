@@ -305,6 +305,9 @@ void loop()
           } //Channel type
         } //For loop going through each channel
       } //aux channels are enabled
+    #if defined (CORE_TEENSY) //debug purpose, only visal for running code
+    digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
+    #endif
     } //4Hz timer
     if (BIT_CHECK(LOOP_TIMER, BIT_TIMER_1HZ)) //Once per second)
     {
