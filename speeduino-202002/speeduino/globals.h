@@ -407,10 +407,10 @@ extern volatile byte LOOP_TIMER;
 #define pinIsIgnition(pin)  ( ((pin) == pinCoil1) || ((pin) == pinCoil2) || ((pin) == pinCoil3) || ((pin) == pinCoil4) )
 #define pinIsSensor(pin)    ( ((pin) == pinCLT) || ((pin) == pinIAT) || ((pin) == pinMAP) || ((pin) == pinTPS) || ((pin) == pinO2) || ((pin) == pinBat) )
 #define pinIsUsed(pin)      ( pinIsInjector((pin)) || pinIsIgnition((pin)) || pinIsSensor((pin)) )
-#define pinIsOutput(pin)    ( ((pin) == pinFuelPump) || ((pin) == pinFan) || ((pin) == pinVVT_1) || ((pin) == pinVVT_2) || ((pin) == pinBoost) || ((pin) == pinIdle1) || ((pin) == pinIdle2) || ((pin) == pinTachOut) )
+#define pinIsOutput(pin)    ( ((pin) == pinFuelPump) || ((pin) == pinFan) || ((pin) == pinVVT_1) || ((pin) == pinVVT_2) || ((pin) == pinBoost) || ((pin) == pinIdle1) || ((pin) == pinIdle2) || ((pin) == pinTachOut) || ((pin) == pinIMCC) || ((pin) == pinKnockWin) )
 
 //The status struct contains the current values for all 'live' variables
-//In current version this is 64 bytes
+//In current version this is 64 bytes=
 struct statuses {
   volatile bool hasSync;
   uint16_t RPM;
@@ -1075,6 +1075,8 @@ extern byte pinBoost;
 extern byte pinVVT_1;		// vvt output 1
 extern byte pinVVT_2;		// vvt output 2
 extern byte pinFan;       // Cooling fan output
+extern byte pinIMCC;
+extern byte pinKnockWin;
 extern byte pinStepperDir; //Direction pin for the stepper motor driver
 extern byte pinStepperStep; //Step pin for the stepper motor driver
 extern byte pinStepperEnable; //Turning the DRV8825 driver on/off

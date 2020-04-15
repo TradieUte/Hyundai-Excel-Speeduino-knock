@@ -186,6 +186,8 @@ byte pinBoost;
 byte pinVVT_1;		// vvt output 1
 byte pinVVT_2;		// vvt output 2
 byte pinFan;       // Cooling fan output
+byte pinIMCC;     // Ford Barra
+byte pinKnockWin; // knock window
 byte pinStepperDir; //Direction pin for the stepper motor driver
 byte pinStepperStep; //Step pin for the stepper motor driver
 byte pinStepperEnable; //Turning the DRV8825 driver on/off

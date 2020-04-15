@@ -1828,7 +1828,55 @@ void setPinMapping(byte boardID)
       pinFan = 11;      //Pin for the fan output
 
       break;
-    #endif 
+ 
+      case 58:
+      //Pin mappings as per the teensy 3.5 FV6.0 board shield
+      pinInjector1 = 5;
+      pinInjector2 = 6;
+      pinInjector3 = 7;
+      pinInjector4 = 8;
+      pinInjector5 = 9;
+      pinInjector6 = 10;
+      pinInjector7 = 22;
+      pinInjector8 = 23;
+      pinCoil1 = 21;
+      pinCoil2 = 20;
+      pinCoil3 = 19;
+      pinCoil4 = 18;
+      pinCoil5 = 17;
+      pinCoil6 = 16;
+      pinCoil7 = 30;
+      pinCoil8 = 31;      
+      pinVVT_1 = 3;     //PWM pin
+      pinVVT_2 = 4;     //PWM pin      
+      pinTrigger = 26;  //Dig in CAS pin
+      pinTrigger2 = 28; //Dig in ECam Sensor pin
+      pinTrigger3 = 27; //Dig in ICam Sensor pin     
+      pinTPS = A10;     //Analog- TPS input pin - not used with Ford Barra
+      pinMAP = A15;     //Analog- MAP sensor pin
+      pinIAT = A19;     //Analog- IAT sensor pin
+      pinCLT = A18;     //Analog- CLT sensor pin
+      pinO2 =  A21;      //Analog- O2 sensor pin
+      pinO2_2 = A23;    //Analog- O2 sensor pin (second sensor)
+      pinBat = A22;     //Analog- Battery reference voltage pin
+      pinBaro = A11;    //Analog- Baro sensor pin - ONLY WITH DB
+      pinTachOut = 2;  //Tacho output pin
+      pinBoost = 40;    //Boost control
+      pinFuelPump = 36; //Fuel pump output
+      pinLaunch = 25;   // Input
+      pinFlex = 39;     //Flex sensor (Must be external interrupt enabled)
+      pinFan = 35;      //Pin for the fan output
+      pinIMCC = 29;     //Intake Manifold Charge Control (Ford L6 Barra)        
+      pinKnockWin = 24; // Integrate/Hold for TPC8101
+      //Reserved pins on Teensy
+      // CS0 on D32;    // Chip Select; Knock
+      // CS1 on D33;    // Chip select; Flash
+      // CS2 on D15;    // Chip select; FlyByWire Throttle
+      // MISO0 on D12
+      // MOSI0 on D11
+      // SCK0 on D14;   // Flash, Knock and Throttle Clock (alternate clock)
+      break;    
+    #endif
 
    #if defined(ARDUINO_BLACK_F407VE)
     case 60:
@@ -2162,6 +2210,8 @@ void setPinMapping(byte boardID)
   pinMode(pinFuelPump, OUTPUT);
   pinMode(pinIgnBypass, OUTPUT);
   pinMode(pinFan, OUTPUT);
+  pinMode(pinIMCC, OUTPUT);   // Ford Barra
+  pinMode(pinKnockWin, OUTPUT);
   pinMode(pinStepperDir, OUTPUT);
   pinMode(pinStepperStep, OUTPUT);
   pinMode(pinStepperEnable, OUTPUT);
