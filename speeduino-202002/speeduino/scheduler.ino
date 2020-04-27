@@ -803,7 +803,7 @@ static inline void fuelSchedule3Interrupt() //Most ARM chips can simply call a f
     {
       //fuelSchedule3.StartCallback();
       //Hack for 5 cylinder
-      if(channel5InjEnabled) { openInjector3and5(); }
+      if(channel5InjEnabled && (configPage2.injLayout != INJ_SEQUENTIAL) ) { openInjector3and5(); }
       else { openInjector3(); }
       fuelSchedule3.Status = RUNNING; //Set the status to be in progress (ie The start callback has been called, but not the end callback)
       FUEL3_COMPARE = FUEL3_COUNTER + uS_TO_TIMER_COMPARE(fuelSchedule3.duration); //Doing this here prevents a potential overflow on restarts
@@ -812,8 +812,8 @@ static inline void fuelSchedule3Interrupt() //Most ARM chips can simply call a f
     {
        //fuelSchedule3.EndCallback();
        //Hack for 5 cylinder
-       if(channel5InjEnabled) { closeInjector3and5(); }
-       else { closeInjector3and5(); }
+       if(channel5InjEnabled && (configPage2.injLayout != INJ_SEQUENTIAL)) { closeInjector3and5(); }
+       else { closeInjector3(); }
        fuelSchedule3.Status = OFF; //Turn off the schedule
        fuelSchedule3.schedulesSet = 0;
 
@@ -1326,6 +1326,22 @@ static inline void ignitionSchedule8Interrupt() //Most ARM chips can simply call
 #if defined(CORE_TEENSY35)
 void ftm0_isr(void)
 {
+  byte status = FTM0_STATUS; // get all 8 channels
+  FTM0_STATUS = 0x00; // clear all channels
+  
+  // which channel(s) interrupted
+  if(status & FTM_STATUS_CH0F) { fuelSchedule1Interrupt(); }
+  if(status & FTM_STATUS_CH1F) { fuelSchedule2Interrupt(); }
+  if(status & FTM_STATUS_CH2F) { fuelSchedule3Interrupt(); }
+  if(status & FTM_STATUS_CH3F) { fuelSchedule4Interrupt(); }
+  if(status & FTM_STATUS_CH4F) { ignitionSchedule1Interrupt(); }
+  if(status & FTM_STATUS_CH5F) { ignitionSchedule2Interrupt(); }
+  if(status & FTM_STATUS_CH6F) { ignitionSchedule3Interrupt(); }
+  if(status & FTM_STATUS_CH7F) { ignitionSchedule4Interrupt(); }
+}
+/*
+void ftm0_isr(void)
+{
   //Use separate variables for each test to ensure conversion to bool
   bool interrupt1 = (FTM0_C0SC & FTM_CSC_CHF);
   bool interrupt2 = (FTM0_C1SC & FTM_CSC_CHF);
@@ -1383,4 +1399,36 @@ void ftm3_isr(void)
 #endif
 
 }
+*/
+void ftm3_isr(void)
+{
+  byte status = FTM3_STATUS;
+  FTM3_STATUS = 0x00;
+
+#if (INJ_CHANNELS >= 5)  
+  if(status & FTM_STATUS_CH0F) { fuelSchedule5Interrupt(); }
+#endif
+#if (INJ_CHANNELS >= 6)
+  if(status & FTM_STATUS_CH1F) { fuelSchedule6Interrupt(); }
+#endif
+#if (INJ_CHANNELS >= 7)
+  if(status & FTM_STATUS_CH2F) { fuelSchedule7Interrupt(); }
+#endif
+#if (INJ_CHANNELS >= 8)
+  if(status & FTM_STATUS_CH3F) { fuelSchedule8Interrupt(); }
+#endif 
+#if IGN_CHANNELS >= 5 
+  if(status & FTM_STATUS_CH4F) { ignitionSchedule5Interrupt(); }
+#endif
+#if IGN_CHANNELS >= 6 
+  if(status & FTM_STATUS_CH5F) { ignitionSchedule6Interrupt(); }
+#endif
+#if (IGN_CHANNELS >= 7)
+  if(status & FTM_STATUS_CH6F) { ignitionSchedule7Interrupt(); }
+#endif
+#if (IGN_CHANNELS >= 8)
+  if(status & FTM_STATUS_CH7F) { ignitionSchedule8Interrupt(); }
+#endif
+}
+
 #endif

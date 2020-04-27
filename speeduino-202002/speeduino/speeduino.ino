@@ -313,6 +313,17 @@ void loop()
     {
       BIT_CLEAR(TIMER_mask, BIT_TIMER_1HZ);
       readBaro(); //Infrequent baro readings are not an issue.
+#if defined (DIAG)
+    Serial1.printf(" BRD %d CYL %d IGN %d INJ %d\n",configPage2.pinMapping,configPage2.nCylinders,configPage4.sparkMode,configPage2.injLayout);
+    if (DIAG1) {Serial1.printf("D1 %U\n",DIAG1);}
+    if (DIAG2) {Serial1.printf("D2 %U\n",DIAG2);}
+    if (DIAG3) {Serial1.printf("D3 %U\n",DIAG3);}
+    if (DIAG4) {Serial1.printf("D4 %U\n",DIAG4);}
+    if (DIAG5) {Serial1.printf("D5 %U\n",DIAG5);}
+    if (DIAG6) {Serial1.printf("D6 %U\n",DIAG6);}
+    if (DIAG7) {Serial1.printf("D7 %U\n",DIAG7);}
+    if (DIAG8) {Serial1.printf("D8 %U\n",DIAG8);}
+#endif
     } //1Hz timer
 
     if( (configPage6.iacAlgorithm == IAC_ALGORITHM_STEP_OL) || (configPage6.iacAlgorithm == IAC_ALGORITHM_STEP_CL) )  { idleControl(); } //Run idlecontrol every loop for stepper idle.
@@ -628,7 +639,7 @@ void loop()
             }
           #endif
           break;
-        //8 cylinders
+        //8 cylinders ????????????????????
         case 8:
           injector2StartAngle = calculateInjector2StartAngle(PWdivTimerPerDegree);
           injector3StartAngle = calculateInjector3StartAngle(PWdivTimerPerDegree);
@@ -971,7 +982,7 @@ void loop()
         if ( tempStartAngle < 0) { tempStartAngle += CRANK_ANGLE_MAX_IGN; }
         //if (tempStartAngle > tempCrankAngle)
         {
-            long ignition3StartTime = 0;
+            unsigned long ignition3StartTime = 0;
             if ( (tempStartAngle <= tempCrankAngle) && (ignitionSchedule3.Status == RUNNING) ) { tempStartAngle += CRANK_ANGLE_MAX_IGN; }
             if(tempStartAngle > tempCrankAngle) { ignition3StartTime = angleToTime((tempStartAngle - tempCrankAngle), CRANKMATH_METHOD_INTERVAL_REV); }
             //else if (tempStartAngle < tempCrankAngle) { ignition4StartTime = ((long)(360 - tempCrankAngle + tempStartAngle) * (long)timePerDegree); }
@@ -996,7 +1007,7 @@ void loop()
         //if (tempStartAngle > tempCrankAngle)
         {
 
-            long ignition4StartTime = 0;
+            unsigned long ignition4StartTime = 0;
             if ( (tempStartAngle <= tempCrankAngle) && (ignitionSchedule4.Status == RUNNING) ) { tempStartAngle += CRANK_ANGLE_MAX_IGN; }
             if(tempStartAngle > tempCrankAngle) { ignition4StartTime = angleToTime((tempStartAngle - tempCrankAngle), CRANKMATH_METHOD_INTERVAL_REV); }
             //else if (tempStartAngle < tempCrankAngle) { ignition4StartTime = ((long)(360 - tempCrankAngle + tempStartAngle) * (long)timePerDegree); }
@@ -1021,7 +1032,7 @@ void loop()
         //if (tempStartAngle > tempCrankAngle)
         {
 
-            long ignition5StartTime = 0;
+            unsigned long ignition5StartTime = 0;
             if ( (tempStartAngle <= tempCrankAngle) && (ignitionSchedule5.Status == RUNNING) ) { tempStartAngle += CRANK_ANGLE_MAX_IGN; }
             if(tempStartAngle > tempCrankAngle) { ignition5StartTime = angleToTime((tempStartAngle - tempCrankAngle), CRANKMATH_METHOD_INTERVAL_REV); }
             //else if (tempStartAngle < tempCrankAngle) { ignition4StartTime = ((long)(360 - tempCrankAngle + tempStartAngle) * (long)timePerDegree); }
@@ -1048,7 +1059,7 @@ void loop()
             if(tempStartAngle > tempCrankAngle) { ignition6StartTime = angleToTime((tempStartAngle - tempCrankAngle), CRANKMATH_METHOD_INTERVAL_REV); }
             else { ignition6StartTime = 0; }
 
-            if( (ignition6StartTime > 0) && (curRollingCut != 2) )
+            if( (ignition6StartTime > 0) && (curRollingCut != 6) )
             {
               setIgnitionSchedule6(ign6StartFunction,
                         ignition6StartTime,
@@ -1070,7 +1081,7 @@ void loop()
             if(tempStartAngle > tempCrankAngle) { ignition7StartTime = angleToTime((tempStartAngle - tempCrankAngle), CRANKMATH_METHOD_INTERVAL_REV); }
             else { ignition7StartTime = 0; }
 
-            if( (ignition7StartTime > 0) && (curRollingCut != 2) )
+            if( (ignition7StartTime > 0) && (curRollingCut != 7) )
             {
               setIgnitionSchedule7(ign7StartFunction,
                         ignition7StartTime,
@@ -1092,7 +1103,7 @@ void loop()
             if(tempStartAngle > tempCrankAngle) { ignition8StartTime = angleToTime((tempStartAngle - tempCrankAngle), CRANKMATH_METHOD_INTERVAL_REV); }
             else { ignition8StartTime = 0; }
 
-            if( (ignition8StartTime > 0) && (curRollingCut != 2) )
+            if( (ignition8StartTime > 0) && (curRollingCut != 8) )
             {
               setIgnitionSchedule8(ign8StartFunction,
                         ignition8StartTime,
@@ -1395,11 +1406,25 @@ void calculateIgnitionAngles(int dwellAngle)
       if(ignition2EndAngle > CRANK_ANGLE_MAX_IGN) {ignition2EndAngle -= CRANK_ANGLE_MAX_IGN;}
       ignition2StartAngle = ignition2EndAngle - dwellAngle;
       if(ignition2StartAngle < 0) {ignition2StartAngle += CRANK_ANGLE_MAX_IGN;}
-
       ignition3EndAngle = channel3IgnDegrees - currentStatus.advance;
       if(ignition3EndAngle > CRANK_ANGLE_MAX_IGN) {ignition3EndAngle -= CRANK_ANGLE_MAX_IGN;}
       ignition3StartAngle = ignition3EndAngle - dwellAngle;
       if(ignition3StartAngle < 0) {ignition3StartAngle += CRANK_ANGLE_MAX_IGN;}
+
+      ignition4EndAngle = channel4IgnDegrees - currentStatus.advance;
+      if(ignition4EndAngle > CRANK_ANGLE_MAX_IGN) {ignition4EndAngle -= CRANK_ANGLE_MAX_IGN;}
+      ignition4StartAngle = ignition4EndAngle - dwellAngle;
+      if(ignition4StartAngle < 0) {ignition4StartAngle += CRANK_ANGLE_MAX_IGN;}
+
+      ignition5EndAngle = channel5IgnDegrees - currentStatus.advance;
+      if(ignition5EndAngle > CRANK_ANGLE_MAX_IGN) {ignition5EndAngle -= CRANK_ANGLE_MAX_IGN;}
+      ignition5StartAngle = ignition5EndAngle - dwellAngle;
+      if(ignition5StartAngle < 0) {ignition5StartAngle += CRANK_ANGLE_MAX_IGN;}
+
+      ignition6EndAngle = channel6IgnDegrees - currentStatus.advance;
+      if(ignition6EndAngle > CRANK_ANGLE_MAX_IGN) {ignition6EndAngle -= CRANK_ANGLE_MAX_IGN;}
+      ignition6StartAngle = ignition6EndAngle - dwellAngle;
+      if(ignition6StartAngle < 0) {ignition6StartAngle += CRANK_ANGLE_MAX_IGN;}
       break;
     //8 cylinders
     case 8:
@@ -1417,6 +1442,26 @@ void calculateIgnitionAngles(int dwellAngle)
       if(ignition4EndAngle > CRANK_ANGLE_MAX_IGN) {ignition4EndAngle -= CRANK_ANGLE_MAX_IGN;}
       ignition4StartAngle = ignition4EndAngle - dwellAngle;
       if(ignition4StartAngle < 0) {ignition4StartAngle += CRANK_ANGLE_MAX_IGN;}
+
+      ignition5EndAngle = channel5IgnDegrees - currentStatus.advance;
+      if(ignition5EndAngle > CRANK_ANGLE_MAX_IGN) {ignition5EndAngle -= CRANK_ANGLE_MAX_IGN;}
+      ignition5StartAngle = ignition5EndAngle - dwellAngle;
+      if(ignition5StartAngle < 0) {ignition5StartAngle += CRANK_ANGLE_MAX_IGN;}
+
+      ignition6EndAngle = channel6IgnDegrees - currentStatus.advance;
+      if(ignition6EndAngle > CRANK_ANGLE_MAX_IGN) {ignition6EndAngle -= CRANK_ANGLE_MAX_IGN;}
+      ignition6StartAngle = ignition6EndAngle - dwellAngle;
+      if(ignition6StartAngle < 0) {ignition6StartAngle += CRANK_ANGLE_MAX_IGN;}
+
+      ignition7EndAngle = channel7IgnDegrees - currentStatus.advance;
+      if(ignition7EndAngle > CRANK_ANGLE_MAX_IGN) {ignition7EndAngle -= CRANK_ANGLE_MAX_IGN;}
+      ignition7StartAngle = ignition7EndAngle - dwellAngle;
+      if(ignition7StartAngle < 0) {ignition7StartAngle += CRANK_ANGLE_MAX_IGN;}
+
+      ignition8EndAngle = channel8IgnDegrees - currentStatus.advance;
+      if(ignition8EndAngle > CRANK_ANGLE_MAX_IGN) {ignition8EndAngle -= CRANK_ANGLE_MAX_IGN;}
+      ignition8StartAngle = ignition8EndAngle - dwellAngle;
+      if(ignition8StartAngle < 0) {ignition8StartAngle += CRANK_ANGLE_MAX_IGN;}
       break;
 
     //Will hit the default case on 1 cylinder or >8 cylinders. Do nothing in these cases

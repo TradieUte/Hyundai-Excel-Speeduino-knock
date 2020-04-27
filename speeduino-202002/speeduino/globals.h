@@ -24,8 +24,19 @@
     #define CORE_TEENSY40
     #define BOARD_H "board_teensy40.h"
   #endif
-  #define INJ_CHANNELS 8
-  #define IGN_CHANNELS 8
+  #define DIAG
+  #if defined (DIAG)
+  volatile unsigned long DIAG1 = 0;
+  volatile unsigned long DIAG2 = 0;
+  volatile unsigned long DIAG3 = 0;
+  volatile unsigned long DIAG4 = 0;
+  volatile unsigned long DIAG5 = 0;
+  volatile unsigned long DIAG6 = 0;
+  volatile unsigned long DIAG7 = 0;
+  volatile unsigned long DIAG8 = 0;
+ #endif
+  #define INJ_CHANNELS 6
+  #define IGN_CHANNELS 6
 
 #elif defined(STM32_MCU_SERIES) || defined(ARDUINO_ARCH_STM32) || defined(STM32)
   #define CORE_STM32
@@ -362,6 +373,9 @@ extern int ignition2EndAngle;
 extern int ignition3EndAngle;
 extern int ignition4EndAngle;
 extern int ignition5EndAngle;
+extern int ignition6EndAngle;
+extern int ignition7EndAngle;
+extern int ignition8EndAngle;
 extern int ignition1StartAngle;
 extern int ignition2StartAngle;
 extern int ignition3StartAngle;

@@ -47,6 +47,9 @@ void initialiseAll()
     Serial.begin(115200);
     if (configPage9.enable_secondarySerial == 1) { CANSerial.begin(115200); }
 
+#if defined (DIAG)
+    Serial1.begin(115200);
+#endif
     #if defined(CORE_STM32)
     configPage9.intcan_available = 1;   // device has internal canbus
     //STM32 can not currently enabled
@@ -573,6 +576,7 @@ void initialiseAll()
           channel5IgnDegrees = 576;
 
           CRANK_ANGLE_MAX_IGN = 720;
+          maxIgnOutputs = 5;
         }
 
         //For alternatiing injection, the squirt occurs at different times for each channel
@@ -613,7 +617,14 @@ void initialiseAll()
 
         channel1InjEnabled = true;
         channel2InjEnabled = true;
-        channel3InjEnabled = false; //this is disabled as injector 5 function calls 3 & 5 together
+        if (configPage2.injLayout == INJ_SEQUENTIAL)
+        {
+          channel3InjEnabled = true;
+        }
+        else
+        {      
+          channel3InjEnabled = false; //this is disabled as injector 5 function calls 3 & 5 together
+        }
         channel4InjEnabled = true;
         channel5InjEnabled = true;
         break;
@@ -655,12 +666,29 @@ void initialiseAll()
         configPage2.injLayout = 0; //This is a failsafe. We can never run semi-sequential with more than 4 cylinders
     #endif
 
+    #if IGN_CHANNELS >= 6
+        if(configPage4.sparkMode == IGN_MODE_SEQUENTIAL)
+        {
+          channel1IgnDegrees = 0;
+          channel2IgnDegrees = 120;
+          channel3IgnDegrees = 240;
+          channel4IgnDegrees = 360;
+          channel5IgnDegrees = 480;
+          channel6IgnDegrees = 600;
+          CRANK_ANGLE_MAX_IGN = 720;
+          maxIgnOutputs = 6;
+        }
+    #endif
+
         if (!configPage2.injTiming) 
         { 
           //For simultaneous, all squirts happen at the same time
           channel1InjDegrees = 0;
           channel2InjDegrees = 0;
           channel3InjDegrees = 0; 
+          channel4InjDegrees = 0;
+          channel5InjDegrees = 0;
+          channel6InjDegrees = 0; 
         } 
 
         channel1InjEnabled = true;
