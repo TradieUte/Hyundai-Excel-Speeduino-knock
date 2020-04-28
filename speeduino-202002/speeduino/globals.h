@@ -420,8 +420,17 @@ extern volatile byte TIMER_mask;
 extern volatile byte LOOP_TIMER;
 
 //These functions all do checks on a pin to determine if it is already in use by another (higher importance) function
+#if (INJ_CHANNELS >= 5)
 #define pinIsInjector(pin)  ( ((pin) == pinInjector1) || ((pin) == pinInjector2) || ((pin) == pinInjector3) || ((pin) == pinInjector4) )
-#define pinIsIgnition(pin)  ( ((pin) == pinCoil1) || ((pin) == pinCoil2) || ((pin) == pinCoil3) || ((pin) == pinCoil4) )
+#else
+#define pinIsInjector(pin)  ( ((pin) == pinInjector1) || ((pin) == pinInjector2) || ((pin) == pinInjector3) || ((pin) == pinInjector4) || ((pin) == pinInjector5) || ((pin) == pinInjector6) || ((pin) == pinInjector7) || ((pin) == pinInjector8) )
+#endif
+#if (IGN_CHANNELS >= 5)
+#define pinIsIgnition(pin)  ( ((pin) == pinCoil1) || ((pin) == pinCoil2) || ((pin) == pinCoil3) || ((pin) == pinCoil4) || ((pin) == pinCoil5) || ((pin) == pinCoil6) || ((pin) == pinCoil7) || ((pin) == pinCoil8) )
+#else
+#define pin
+IsIgnition(pin)  ( ((pin) == pinCoil1) || ((pin) == pinCoil2) || ((pin) == pinCoil3) || ((pin) == pinCoil4) )
+#endif
 #define pinIsSensor(pin)    ( ((pin) == pinCLT) || ((pin) == pinIAT) || ((pin) == pinMAP) || ((pin) == pinTPS) || ((pin) == pinO2) || ((pin) == pinBat) )
 #define pinIsUsed(pin)      ( pinIsInjector((pin)) || pinIsIgnition((pin)) || pinIsSensor((pin)) )
 #define pinIsOutput(pin)    ( ((pin) == pinFuelPump) || ((pin) == pinFan) || ((pin) == pinVVT_1) || ((pin) == pinVVT_2) || ((pin) == pinBoost) || ((pin) == pinIdle1) || ((pin) == pinIdle2) || ((pin) == pinTachOut) || ((pin) == pinIMCC) || ((pin) == pinKnockWin) )
@@ -1041,10 +1050,10 @@ extern byte pinInjector1; //Output pin injector 1
 extern byte pinInjector2; //Output pin injector 2
 extern byte pinInjector3; //Output pin injector 3 is on
 extern byte pinInjector4; //Output pin injector 4 is on
-extern byte pinInjector5; //Output pin injector 5 NOT USED YET
-extern byte pinInjector6; //Placeholder only - NOT USED
-extern byte pinInjector7; //Placeholder only - NOT USED
-extern byte pinInjector8; //Placeholder only - NOT USED
+extern byte pinInjector5; //Output pin injector 5 
+extern byte pinInjector6; //Output pin injector 6
+extern byte pinInjector7; //Output pin injector 7
+extern byte pinInjector8; //Output pin injector 8
 extern byte pinCoil1; //Pin for coil 1
 extern byte pinCoil2; //Pin for coil 2
 extern byte pinCoil3; //Pin for coil 3
