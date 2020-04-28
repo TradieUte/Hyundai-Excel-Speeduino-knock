@@ -324,6 +324,14 @@ void loop()
     if (DIAG6) {Serial1.printf("D6 %U\n",DIAG6);}
     if (DIAG7) {Serial1.printf("D7 %U\n",DIAG7);}
     if (DIAG8) {Serial1.printf("D8 %U\n",DIAG8);}
+    DIAG1=0;
+    DIAG2=0;
+    DIAG3=0;
+    DIAG4=0;
+    DIAG5=0;
+    DIAG6=0;
+    DIAG7=0;
+    DIAG8=0;
 #endif
     } //1Hz timer
 
