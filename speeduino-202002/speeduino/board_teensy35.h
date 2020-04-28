@@ -138,6 +138,46 @@
 * CAN / Second serial
 */
   //Uart CANSerial (&sercom3, 0, 1, SERCOM_RX_PAD_1, UART_TX_PAD_0);
+  
+/*
+  New tacho
+ */
+static inline void startTacho(void);  // includes skip setup
+static inline void start_tacho(void); // does skip if required
+
+/*
+  Knock Stuff
+ */
+static inline void launchKnockWindow();
+void initialiseKnock();
+uint8_t sendCmd(uint8_t);
+//static inline void getKnockValue();
+volatile int knock_threshold = 0;
+volatile byte rpmModGain = 0; // gain as a function of rpm
+volatile bool knockRecoveryFirstStepDelay = false;
+
+// SPI commands for TPIC8101
+#define PS_SDO_STAT_CMD  0b01000110 // 8MHz in, SDO active
+#define CHAN1_SEL_CMD    0b11100000 // channel 1
+#define CHAN2_SEL_CMD    0b11100001 // channel 2
+#define BPCF_CMD         0b00000000 // band pass center frequency SPI cmd
+#define INT_GAIN_CMD     0b10000000 // Integrator gain
+#define INT_TC_CMD       0b11000000 // Integrator Time constant
+#define ADV_MODE_CMD     0b01110001 // switch to advanced mode
+#define REQUEST_LOW_BYTE     0b01000110 // (when in advanced mode)
+#define REQUEST_HIGH_BYTE    0b11100000 // (when in advanced mode)
+
+// TPIC8101 values
+int timeConst[] = {40,45,50,55,60,65,70,75,80,90,100,110,120,130,140,150,160,180,200,220,240,260,280,300,320,360,400,440,480,520,560,600};
+// the gainK array is inverted from that required by TPIC8101 to allow both timeConst and gainK to be searched with same routine. The array index of gainK from the search is adjusted when calculating rpmModGain.
+int gainK[] = {111,118,125,129,133,138,143,148,154,160,167,174,182,190,200,211,222,236,250,258,267,276,286,296,308,320,333,348,364,381,400,421,444,471,500,548,567,586,607,630,654,680,708,739,773,810,850,895,944,1000,1063,1143,1185,1231,1280,1333,1391,1455,1523,1600,1684,1778,1882,2000};
+byte getClosestIndex(int, int [], byte);
+byte closestIndex(int, int, int [], int);
+
+int16_t knockWindowSize = 0;  //The current crank angle delta that defines the knock window duration
+int16_t knockWindowDelay = 0; //The current crank angle after end of ign dwell for a knock pulse to be valid
+int16_t knockWindowGainFactor = 0;  // to control the sensor sensitivity as rpm (noise) increases
+volatile byte integrator_time_constant = 0;
 
 #endif //CORE_TEENSY
 #endif //TEENSY35_H

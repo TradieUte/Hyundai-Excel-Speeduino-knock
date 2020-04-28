@@ -62,7 +62,11 @@ void oneMSInterval() //Most ARM chips can simply call a function
   if(ignitionSchedule3.Status == RUNNING) { if( (ignitionSchedule3.startTime < targetOverdwellTime) && (configPage4.useDwellLim) && (isCrankLocked != true) ) { ign3EndFunction(); ignitionSchedule3.Status = OFF; } }
   if(ignitionSchedule4.Status == RUNNING) { if( (ignitionSchedule4.startTime < targetOverdwellTime) && (configPage4.useDwellLim) && (isCrankLocked != true) ) { ign4EndFunction(); ignitionSchedule4.Status = OFF; } }
   if(ignitionSchedule5.Status == RUNNING) { if( (ignitionSchedule5.startTime < targetOverdwellTime) && (configPage4.useDwellLim) && (isCrankLocked != true) ) { ign5EndFunction(); ignitionSchedule5.Status = OFF; } }
+  if(ignitionSchedule6.Status == RUNNING) { if( (ignitionSchedule6.startTime < targetOverdwellTime) && (configPage4.useDwellLim) && (isCrankLocked != true) ) { endCoil6Charge(); ignitionSchedule6.Status = OFF; } }
+  if(ignitionSchedule7.Status == RUNNING) { if( (ignitionSchedule7.startTime < targetOverdwellTime) && (configPage4.useDwellLim) && (isCrankLocked != true) ) { endCoil7Charge(); ignitionSchedule7.Status = OFF; } }
+  if(ignitionSchedule8.Status == RUNNING) { if( (ignitionSchedule8.startTime < targetOverdwellTime) && (configPage4.useDwellLim) && (isCrankLocked != true) ) { endCoil8Charge(); ignitionSchedule8.Status = OFF; } }
 
+#if !defined (CORE_TEENSY)
   //Tacho output check
   //Tacho is flagged as being ready for a pulse by the ignition outputs. 
   if(tachoOutputFlag == READY)
@@ -91,6 +95,77 @@ void oneMSInterval() //Most ARM chips can simply call a function
       tachoOutputFlag = DEACTIVE;
     }
   }
+/*
+    // knock intervals all at 100ms in Tuner Studio
+    // knockCounter is incremented by pit3_isr
+    // knockRetard is used for ignition corrections (corrections.ino)
+    static int lastKnockCount = 1000; // arbitrarily large count to ensure first use is valid
+    static int retardStepTime = 0;   // retard knock sample interval counter
+    static int advanceStepTime = 0;  // retard recovery (advance) interval counter; incremented in advance process
+    static int advanceDelay = 0;     // accumulates the delay between last no-knock condition and start of advance process
+    // algorithm first checks if retard is required, then allows advance to happen. The consequence is that 
+    // the minimum advance recovery interval is set by the knock sample retard interval.
+    if (configPage10.knock_mode != KNOCK_MODE_OFF)
+    {
+      if (++retardStepTime >= configPage10.knock_stepTime) // accumulate knock events during this time
+      {
+        retardStepTime=0;
+        if ((knockCounter <= configPage10.knock_count) || (currentStatus.RPM >= configPage10.knock_maxRPM*100) ||(currentStatus.MAP >= (configPage10.knock_maxMAP<<1)) ) // "no knock" condition (knockCounter incremented in pit3_isr)
+        {
+          currentStatus.knockActive = false;
+          if (knockRecoveryFirstStepDelay == true)
+          {
+            knockRecoveryFirstStepDelay = false;
+            // the following ensures knock advance recovery process starts on time after last instance of knock,
+            // for any value of configPage10.knock_duration and configPage10.knock_recoveryStepTime
+            // delay can not be less than configPage10.knock_stepTime, as that has already occurred to arrive at this point
+            advanceDelay = configPage10.knock_duration - configPage10.knock_recoveryStepTime - configPage10.knock_stepTime;
+            if (advanceDelay <= 0)
+            {
+              advanceDelay = 0;
+              // configPage10.knock_stepTime is added to advanceStepTime, because that time has already passed to get here.
+              advanceStepTime = configPage10.knock_recoveryStepTime - configPage10.knock_duration + configPage10.knock_stepTime; // for first step of recovery
+            }
+          advanceStepTime = configPage10.knock_stepTime - configPage10.knock_recoveryStepTime;  // if knock check time greater than advance recovery step time
+          if (advanceStepTime <= 0) {advanceStepTime = configPage10.knock_recoveryStepTime;}    // setup for no advance recovery delay
+          }
+        }
+        else  // retard spark
+        {
+          currentStatus.knockActive = true;
+          knockRecoveryFirstStepDelay = true; // setup for advance process
+          int knock_retard = knockRetard; // do calcs on local variable knock_retard
+          if (knock_retard < configPage10.knock_maxRetard) // used in corrections.ino
+          {
+            if ((knockCounter > lastKnockCount) || (knockCounter > (configPage10.knock_count << 4))) // high or increasing knock count
+            {
+              knock_retard += configPage10.knock_firstStep;  // agressive ign retard
+            }
+            else
+            {
+              knock_retard += configPage10.knock_stepSize;   // normal ign retard
+            }
+            lastKnockCount = knockCounter;  // store last knock count
+            if (knock_retard > configPage10.knock_maxRetard) {knock_retard = configPage10.knock_maxRetard;}
+          }
+          knockRetard = knock_retard; // update global variable
+        }
+        knockCounter = 0; // incremented by pit3_isr each time a knock is registered
+      }
+      // advance spark - if knock just finished, wait advanceDelay before advancing
+      if ( (currentStatus.knockActive == false) && (knockRetard > 0) && (--advanceDelay <= 0) ) // no knock; positive retard value; advance start delay expired
+      {
+        if (++advanceStepTime >= configPage10.knock_recoveryStepTime) // time, in 100mS increments, between advance steps
+        {
+          advanceStepTime = 0;
+          knockRetard -= configPage10.knock_recoveryStep;
+          if (knockRetard < 0) {knockRetard = 0;}
+        }
+        advanceDelay = 0;
+      }
+    }
+*/
+#endif 
   
 
 

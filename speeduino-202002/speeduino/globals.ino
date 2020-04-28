@@ -199,6 +199,10 @@ byte pinIgnBypass; //The pin used for an ignition bypass (Optional)
 byte pinFlex; //Pin with the flex sensor attached
 byte pinBaro; //Pin that an al barometric pressure sensor is attached to (If used)
 byte pinResetControl; // Output pin used control resetting the Arduino
+byte CS0;  // TPC8101 - knock
+byte CS1;  // FLASH on PCB
+byte CS2;  // DBW pocessor
+byte SCK0; // alternative clock - leave LED_BUILTIN = 13 available
 #ifdef USE_MC33810
   //If the MC33810 IC\s are in use, these are the chip select pins
   byte pinMC33810_1_CS;

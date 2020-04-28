@@ -16,6 +16,13 @@
   //#define TIMER5_MICROS
 
 #elif defined(CORE_TEENSY)
+  volatile int tach_pulse_duration = 30000; // high speed tacho, uSec (60 x 500)
+  volatile byte skip_factor = 0;   // high speed tacho
+  volatile byte skip_pulse_val = 0; // high speed tacho
+  volatile uint32_t knockWindowStartDelay = 0;    // uSec
+  volatile uint32_t knockWindowDuration = 0; // uSec
+  void mapFiringOrder(void);
+
   #if defined(__MK64FX512__) || defined(__MK66FX1M0__)
     #define CORE_TEENSY35
     #define BOARD_H "board_teensy35.h"
@@ -1103,6 +1110,11 @@ extern byte pinVVT_2;		// vvt output 2
 extern byte pinFan;       // Cooling fan output
 extern byte pinIMCC;
 extern byte pinKnockWin;
+extern byte CS0;  // TPC8101 - knock
+extern byte CS1;  // FLASH on PCB
+extern byte CS2;  // DBW pocessor
+extern byte SCK0; // alternative clock - leave LED_BUILTIN = 13 available
+
 extern byte pinStepperDir; //Direction pin for the stepper motor driver
 extern byte pinStepperStep; //Step pin for the stepper motor driver
 extern byte pinStepperEnable; //Turning the DRV8825 driver on/off

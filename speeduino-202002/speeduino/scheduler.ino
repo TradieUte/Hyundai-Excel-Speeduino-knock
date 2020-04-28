@@ -1008,6 +1008,9 @@ static inline void ignitionSchedule1Interrupt() //Most ARM chips can simply call
   {
     if (ignitionSchedule1.Status == PENDING) //Check to see if this schedule is turn on
     {
+#if defined (CORE_TEENSY) // new tacho code
+      startTacho(); // this function also initialises tacho speed division
+#endif
       ignitionSchedule1.StartCallback();
       ignitionSchedule1.Status = RUNNING; //Set the status to be in progress (ie The start callback has been called, but not the end callback)
       ignitionSchedule1.startTime = micros();
@@ -1049,6 +1052,9 @@ static inline void ignitionSchedule2Interrupt() //Most ARM chips can simply call
   {
     if (ignitionSchedule2.Status == PENDING) //Check to see if this schedule is turn on
     {
+#if defined (CORE_TEENSY)
+      start_tacho();  // this function also runs tacho speed division
+#endif
       ignitionSchedule2.StartCallback();
       ignitionSchedule2.Status = RUNNING; //Set the status to be in progress (ie The start callback has been called, but not the end callback)
       ignitionSchedule2.startTime = micros();
@@ -1090,6 +1096,9 @@ static inline void ignitionSchedule3Interrupt() //Most ARM chips can simply call
   {
     if (ignitionSchedule3.Status == PENDING) //Check to see if this schedule is turn on
     {
+#if defined (CORE_TEENSY)
+      start_tacho();
+#endif
       ignitionSchedule3.StartCallback();
       ignitionSchedule3.Status = RUNNING; //Set the status to be in progress (ie The start callback has been called, but not the end callback)
       ignitionSchedule3.startTime = micros();
@@ -1131,6 +1140,9 @@ static inline void ignitionSchedule4Interrupt() //Most ARM chips can simply call
   {
     if (ignitionSchedule4.Status == PENDING) //Check to see if this schedule is turn on
     {
+#if defined (CORE_TEENSY)
+      start_tacho();  // this function also runs tacho speed division
+#endif
       ignitionSchedule4.StartCallback();
       ignitionSchedule4.Status = RUNNING; //Set the status to be in progress (ie The start callback has been called, but not the end callback)
       ignitionSchedule4.startTime = micros();
@@ -1171,6 +1183,9 @@ static inline void ignitionSchedule5Interrupt() //Most ARM chips can simply call
   {
     if (ignitionSchedule5.Status == PENDING) //Check to see if this schedule is turn on
     {
+#if defined (CORE_TEENSY)
+      start_tacho();  // this function also runs tacho speed division
+#endif
       ignitionSchedule5.StartCallback();
       ignitionSchedule5.Status = RUNNING; //Set the status to be in progress (ie The start callback has been called, but not the end callback)
       ignitionSchedule5.startTime = micros();
@@ -1211,6 +1226,9 @@ static inline void ignitionSchedule6Interrupt() //Most ARM chips can simply call
   {
     if (ignitionSchedule6.Status == PENDING) //Check to see if this schedule is turn on
     {
+#if defined (CORE_TEENSY)
+      start_tacho();  // this function also runs tacho speed division
+#endif
       ignitionSchedule6.StartCallback();
       ignitionSchedule6.Status = RUNNING; //Set the status to be in progress (ie The start callback has been called, but not the end callback)
       ignitionSchedule6.startTime = micros();
@@ -1251,6 +1269,9 @@ static inline void ignitionSchedule7Interrupt() //Most ARM chips can simply call
   {
     if (ignitionSchedule7.Status == PENDING) //Check to see if this schedule is turn on
     {
+#if defined (CORE_TEENSY)
+      start_tacho();  // this function also runs tacho speed division
+#endif
       ignitionSchedule7.StartCallback();
       ignitionSchedule7.Status = RUNNING; //Set the status to be in progress (ie The start callback has been called, but not the end callback)
       ignitionSchedule7.startTime = micros();
@@ -1291,6 +1312,9 @@ static inline void ignitionSchedule8Interrupt() //Most ARM chips can simply call
   {
     if (ignitionSchedule8.Status == PENDING) //Check to see if this schedule is turn on
     {
+#if defined (CORE_TEENSY)
+      start_tacho();  // this function also runs tacho speed division
+#endif
       ignitionSchedule8.StartCallback();
       ignitionSchedule8.Status = RUNNING; //Set the status to be in progress (ie The start callback has been called, but not the end callback)
       ignitionSchedule8.startTime = micros();
