@@ -143,7 +143,6 @@
   New tacho
  */
 static inline void startTacho(void);  // includes skip setup
-static inline void start_tacho(void); // does skip if required
 
 /*
   Knock Stuff

@@ -15,10 +15,9 @@
 
   //#define TIMER5_MICROS
 
-#elif defined(CORE_TEENSY)
+#elif defined(CORE_TEENSY)  // new tacho
   volatile int tach_pulse_duration = 30000; // high speed tacho, uSec (60 x 500)
   volatile byte skip_factor = 0;   // high speed tacho
-  volatile byte skip_pulse_val = 0; // high speed tacho
   volatile uint32_t knockWindowStartDelay = 0;    // uSec
   volatile uint32_t knockWindowDuration = 0; // uSec
   void mapFiringOrder(void);

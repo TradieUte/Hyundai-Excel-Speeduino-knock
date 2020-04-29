@@ -572,18 +572,11 @@ static inline void launchKnockWindow()
 }
 */
 
-static inline void startTacho(void) // also sets up for skip
-{
-  skip_factor = skip_pulse_val; // 0=Normal, 1=Half, (nCylinders/2 -1)=Crank -- value determined during setup
-  TACHO_PULSE_HIGH();
-  PIT_LDVAL1 = tach_pulse_duration;
-  PIT_TCTRL1 |= PIT_TCTRL_TEN; // start PIT1
-}
-
-static inline void start_tacho(void) // skip pulses if required
+static inline void startTacho(void) // skip pulses if required
 {
   if (skip_factor == 0)
   {
+    skip_factor = configPage2.tachoDiv;
     TACHO_PULSE_HIGH();
     PIT_LDVAL1 = tach_pulse_duration;
     PIT_TCTRL1 |= PIT_TCTRL_TEN; // start PIT1

@@ -225,51 +225,16 @@ void initialiseAll()
 
 #if defined (CORE_TEENSY)
     // new tacho    
-    // setup for tacho pulse division and tacho pulse duration
     // longest permissable tach duration is 50% of time between ign events used for tacho pulse
-    // if calculated time is greater than max duration, then use max duration
-    // startTacho() and start_tacho() use 'skip_pulse_val' and 'tach_pulse_duration'
+    // if calculated time is greater than TunerStudio pulse duration, then use TS pulse duration
 
     int max_calc_duration = 0;  // microsec
     int rev_cutoff = configPage4.HardRevLim * 100;
 
     // PIT clock - 60MHz - PIT counts down to 0 for interrupt
-    tach_pulse_duration =  (configPage2.tachoDuration * 1000 * 60) - 1; // Max val from TS, convert to uS (mS x 1000 x 60)
+    tach_pulse_duration =  (configPage2.tachoDuration * 1000 * 60) - 1; // pulse duration from TS, convert to uS (mS x 1000 x 60)
     // longest duration in uS for max revs at nCyl and 50% dc
     max_calc_duration = (60000000)/((rev_cutoff/60) * configPage2.nCylinders) - 1;
-    switch (configPage2.tachoDiv)
-    {
-      case 0:
-        skip_pulse_val = 0; // pulse on every ign event
-      break;
-
-      case 1:
-        skip_pulse_val = 1; // pulse on alternate ign events
-        max_calc_duration *= 2;
-      break;
-
-      case 2:
-        if (configPage2.nCylinders == 4)
-        {
-          skip_pulse_val = 1; // pulse on 1st and 3rd ign events
-          max_calc_duration *= 2;
-        }
-        if (configPage2.nCylinders == 6)
-        {
-          skip_pulse_val = 2; // pulse on 1st and 4th ign events
-          max_calc_duration *= 3;
-        }
-        if (configPage2.nCylinders == 8)
-        {
-          skip_pulse_val = 3; // pulse on 1st and 5th ign events
-          max_calc_duration *= 4;
-        }
-      break;
-    
-      default:
-        skip_pulse_val = 0;
-      break;
-    }
     if (max_calc_duration < tach_pulse_duration)
     {
       tach_pulse_duration = max_calc_duration;
