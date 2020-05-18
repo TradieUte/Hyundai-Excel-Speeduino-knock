@@ -3,6 +3,7 @@
 #include <Arduino.h>
 #include "table.h"
 #include <assert.h>
+#include <SPI.h>
 
 #if defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__) || defined(__AVR_ATmega2561__)
   #define BOARD_DIGITAL_GPIO_PINS 54
@@ -15,11 +16,9 @@
 
   //#define TIMER5_MICROS
 
-#elif defined(CORE_TEENSY)  // new tacho
-  volatile int tach_pulse_duration = 30000; // high speed tacho, uSec (60 x 500)
-  volatile byte skip_factor = 0;   // high speed tacho
-  volatile uint32_t knockWindowStartDelay = 0;    // uSec
-  volatile uint32_t knockWindowDuration = 0; // uSec
+#elif defined(CORE_TEENSY)
+  volatile int tachPulseDuration = 0; // new tacho
+  volatile byte skipFlag = 0;        // new tacho
   void mapFiringOrder(void);
 
   #if defined(__MK64FX512__) || defined(__MK66FX1M0__)
@@ -98,6 +97,8 @@
 #else
   #error Incorrect board selected. Please select the correct board (Usually Mega 2560) and upload again
 #endif
+
+SPISettings knockSettings;
 
 //This can only be included after the above section
 #include BOARD_H //Note that this is not a real file, it is defined in globals.h. 
@@ -321,6 +322,7 @@ extern struct table2D flexAdvTable;   //6 bin flex fuel correction table for tim
 extern struct table2D flexBoostTable; //6 bin flex fuel correction table for boost adjustments (2D)
 extern struct table2D knockWindowStartTable;
 extern struct table2D knockWindowDurationTable;
+extern struct table2D knockWindowSensivityTable;
 
 //These are for the direct port manipulation of the injectors, coils and aux outputs
 extern volatile PORT_TYPE *inj1_pin_port;
@@ -366,6 +368,8 @@ extern volatile PORT_TYPE *triggerPri_pin_port;
 extern volatile PINMASK_TYPE triggerPri_pin_mask;
 extern volatile PORT_TYPE *triggerSec_pin_port;
 extern volatile PINMASK_TYPE triggerSec_pin_mask;
+extern volatile PORT_TYPE *knock_win_pin_port;
+extern volatile PINMASK_TYPE knock_win_pin_mask;
 
 //These need to be here as they are used in both speeduino.ino and scheduler.ino
 extern bool channel1InjEnabled;
@@ -945,7 +949,7 @@ Page 10 - No specific purpose. Created initially for the cranking enrich curve
 See ini file for further info (Config Page 11 in the ini)
 */
 struct config10 {
-  byte crankingEnrichBins[4]; //Bytes 0-4
+  byte crankingEnrichBins[4]; //Bytes 0-3
   byte crankingEnrichValues[4]; //Bytes 4-7
 
   //Byte 8
@@ -1016,35 +1020,36 @@ struct config10 {
   byte knock_window_rpms[6]; //Bytes 97-102
   byte knock_window_angle[6]; //Bytes 103-108
   byte knock_window_dur[6]; //Bytes 109-114
-
-  byte knock_maxRetard; //Byte 115
-  byte knock_firstStep; //Byte 116
-  byte knock_stepSize; //Byte 117
-  byte knock_stepTime; //Byte 118
+  byte knock_window_sensitivity[6]; //Bytes 115-120
+  int band_pass_frequency; // Knock sensor centre frequency bytes 121,122
+  int knock_sensor_output; // Bytes 123, 124
+  byte knock_maxRetard; //Byte 125
+  byte knock_firstStep; //Byte 126
+  byte knock_stepSize; //Byte 127
+  byte knock_stepTime; //Byte 128
         
-  byte knock_duration; //Time after knock retard starts that it should start recovering. Byte 119
-  byte knock_recoveryStepTime; //Byte 120
-  byte knock_recoveryStep; //Byte 121
+  byte knock_duration; //Time after knock retard starts that it should start recovering. Byte 129
+  byte knock_recoveryStepTime; //Byte 130
+  byte knock_recoveryStep; //Byte 131
 
-  //Byte 122
+  //Byte 132
   byte fuel2Algorithm : 3;
   byte fuel2Mode : 3;
   byte fuel2SwitchVariable : 2;
-  uint16_t fuel2SwitchValue;
+  uint16_t fuel2SwitchValue;  // Bytes 133, 134
 
-  //Byte 123
+  //Byte 135
   byte fuel2InputPin : 6;
   byte fuel2InputPolarity : 1;
   byte fuel2InputPullup : 1;
 
-  byte vvtCLholdDuty;
-  byte vvtCLKP;
-  byte vvtCLKI;
-  byte vvtCLKD;
-  uint16_t vvtCLMinAng;
-  uint16_t vvtCLMaxAng;
-
-  byte unused11_123_191[58];
+  byte vvtCLholdDuty; // Byte 136
+  byte vvtCLKP; // Byte 137
+  byte vvtCLKI; // Byte 138
+  byte vvtCLKD; // Byte 139
+  uint16_t vvtCLMinAng; // Bytes 140, 141
+  uint16_t vvtCLMaxAng;// Bytes 142, 143
+  byte unused11_144_191[44];
 
 #if defined(CORE_AVR)
   };
@@ -1111,7 +1116,7 @@ extern byte pinIMCC;
 extern byte pinKnockWin;
 extern byte CS0;  // TPC8101 - knock
 extern byte CS1;  // FLASH on PCB
-extern byte CS2;  // DBW pocessor
+extern byte CS2;  // DriveByWire processor
 extern byte SCK0; // alternative clock - leave LED_BUILTIN = 13 available
 
 extern byte pinStepperDir; //Direction pin for the stepper motor driver

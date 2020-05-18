@@ -4,9 +4,8 @@
 #include "auxiliaries.h"
 #include "idle.h"
 #include "scheduler.h"
-#include <SPI.h>
+#include "knock.h"
 
-SPISettings knockSettings(1000000, MSBFIRST, SPI_MODE1);  // SPI comms setup
 
 void initBoard()
 {
@@ -95,7 +94,6 @@ void initBoard()
     PIT_TCTRL0 |= PIT_TCTRL_TEN; // timer 0 enable
 
     // Use PIT1 for Tacho duration (oneshot)
-    PIT_LDVAL1 = tach_pulse_duration;
     PIT_TFLG1 = 1;               // clear any interrupts
     PIT_TCTRL1 |= PIT_TCTRL_TIE; // enable interrupt;
     NVIC_ENABLE_IRQ(IRQ_PIT_CH1);
@@ -411,46 +409,6 @@ uint16_t freeRam()
     return (uint16_t)stackTop - heapTop;
 }
 
-/*
-void initialiseKnock()
-{
-  if ((configPage10.knock_mode == KNOCK_MODE_DIGITAL))
-  {
-    // do this here once, rather than in pit3_isr
-    knock_threshold = map(configPage10.knock_threshold, 0, 50, 0, 1024); // T/S (0-50)/10 Volt; TPIC8101 0 -1024
-
-    // setup SPI for knock detector TPIC8101 - NB the chip uses CS to load values to internal registers
-    uint8_t ret;
-#if !defined(PCB_FLASH)    
-    SPI.setSCK(SCK0); // alternate clock pin
-    SPI.begin();      // init CPU hardware
-#endif
-    SPI.beginTransaction(knockSettings);
-    ret = sendCmd(PS_SDO_STAT_CMD); // set prescaler for 8MHz input; SDO active
-    if (ret == PS_SDO_STAT_CMD)     // if not already in advanced mode, continue
-    {
-      sendCmd(CHAN1_SEL_CMD);                               // select channel 1
-      sendCmd(BPCF_CMD | configPage10.band_pass_frequency); // set bandpassCenterFrequency
-      sendCmd(INT_GAIN_CMD | rpmModGain);                   // set gain
-      sendCmd(INT_TC_CMD | integrator_time_constant);       // set integrationTimeConstant
-      sendCmd(ADV_MODE_CMD);                                // set advanced mode - allows receiving integrator data - clearing advanced mode requires power off
-    }
-    SPI.endTransaction();
-
-    // Use PIT2 for Knock window start (oneshot)
-    PIT_TFLG2 = 1;               // clear any interrupts
-    PIT_TCTRL2 |= PIT_TCTRL_TIE; // enable interrupt;
-    NVIC_ENABLE_IRQ(IRQ_PIT_CH2);
-
-    // Use PIT3 for Knock window duration (oneshot)
-    PIT_TFLG3 = 1;               // clear any interrupts
-    PIT_TCTRL3 |= PIT_TCTRL_TIE; // enable interrupt;
-    NVIC_ENABLE_IRQ(IRQ_PIT_CH3);
-  }
-  // KNOCK_MODE_ANALOG - nothing here yet
-}
-*/
-
 void pit0_isr() // free running one mS timer
 {
   PIT_TFLG0 = 1; // clear interrupt - loads timer value, restarts timer countdown
@@ -463,7 +421,7 @@ void pit1_isr() // Tach pulse end (oneshot)
   PIT_TFLG1 = 1;                // clear interrupt flag - reloads (fixed) countdown value from PIT_LDVAL1
   TACHO_PULSE_LOW();
 }
-/*
+
 // PIT2 (oneshot) determines the time between ignition pulse end and knock window start
 // when PIT2 interrupts, start the knock window duration timer PIT3
 void pit2_isr() // window start delay end (oneshot)
@@ -485,7 +443,6 @@ void pit3_isr() // knock window end (oneshot)
   PIT_TCTRL3 &= ~PIT_TCTRL_TEN; // stop PIT3
   PIT_TFLG3 = 1;                // clear interrupt flag - reloads countdown value from PIT_LDVAL3
   CLOSE_KNOCK_WINDOW();
-  //delayMicroseconds(1);
   // get knock Value - takes 16 uSec with 2MHz clock
   SPI.beginTransaction(knockSettings);
   CS0_ASSERT();  
@@ -503,66 +460,6 @@ void pit3_isr() // knock window end (oneshot)
   }
 }
 
-uint8_t sendCmd(uint8_t cmd)
-{
-  uint8_t val = 0;
-  CS0_ASSERT();
-  val = SPI.transfer(cmd);
-  CS0_RELEASE();
-  return (val);
-}
-
-
-byte getClosestIndex(int val, int array[], byte sz)
-{
-  // binary search
-  int i = 0;
-  int j = sz;
-  int k = 0;
-  while (i < j)
-  {
-    k = (i + j) / 2;     // middle of search range
-    if (array[k] == val) // best hope
-    {
-      return (k); // return matched value index
-    }
-
-    if (val < array[k]) // search left of array[k]
-    {
-      // integrator_time_constant is the index to the internal TCIP8101 tc table
-
-      if (k > 0 && val > array[k - 1])
-      {
-        byte idx = closestIndex(k - 1, k, array, val);
-        return (idx);
-      }
-      j = k;
-    }
-    else  // search right of array[k]
-    {
-      if ((k < sz - 1) && (val < array[k + 1]))
-      {
-        byte idx = closestIndex(k, k + 1, array, val);
-        return (idx);
-      }
-      i = k + 1;
-    }
-  }
-  return (k);
-}
-
-byte closestIndex(int idx1, int idx2, int array[], int reqVal)
-{
-  if ((reqVal - array[idx1]) >= (array[idx2] - reqVal))
-  {
-    return (idx1);
-  }
-  else
-  {
-    return (idx2);
-  }
-}
-
 // called by each ignition isr at the end of the ign pulse
 static inline void launchKnockWindow()
 {
@@ -570,20 +467,20 @@ static inline void launchKnockWindow()
   PIT_TFLG2 = 1;               // clear interrupt flag
   PIT_TCTRL2 |= PIT_TCTRL_TEN; // start timer
 }
-*/
+
 
 static inline void startTacho(void) // skip pulses if required
 {
-  if (skip_factor == 0)
+  if (skipFlag == 0)
   {
-    skip_factor = configPage2.tachoDiv;
+    skipFlag = configPage2.tachoDiv;
     TACHO_PULSE_HIGH();
-    PIT_LDVAL1 = tach_pulse_duration;
+    PIT_LDVAL1 = tachPulseDuration;
     PIT_TCTRL1 |= PIT_TCTRL_TEN; // start PIT1
   }
   else
   {
-    skip_factor--;
+    skipFlag--;
   }
 }
 

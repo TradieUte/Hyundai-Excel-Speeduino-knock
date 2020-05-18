@@ -37,6 +37,7 @@ struct table2D flexAdvTable;   //6 bin flex fuel correction table for timing adv
 struct table2D flexBoostTable; //6 bin flex fuel correction table for boost adjustments (2D)
 struct table2D knockWindowStartTable;
 struct table2D knockWindowDurationTable;
+struct table2D knockWindowSensivityTable;
 
 //These are for the direct port manipulation of the injectors, coils and aux outputs
 volatile PORT_TYPE *inj1_pin_port;
@@ -82,6 +83,8 @@ volatile PORT_TYPE *triggerPri_pin_port;
 volatile PINMASK_TYPE triggerPri_pin_mask;
 volatile PORT_TYPE *triggerSec_pin_port;
 volatile PINMASK_TYPE triggerSec_pin_mask;
+volatile PORT_TYPE *knock_win_pin_port;
+volatile PINMASK_TYPE knock_win_pin_mask;
 
 //These need to be here as they are used in both speeduino.ino and scheduler.ino
 bool channel1InjEnabled = true;

@@ -306,9 +306,12 @@ void loop()
           } //Channel type
         } //For loop going through each channel
       } //aux channels are enabled
-    #if defined (CORE_TEENSY) //debug purpose, only visal for running code
-    digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
-    #endif
+    
+    if (configPage10.knock_mode)
+    {
+      refreshKnockParameters();
+    }
+
     } //4Hz timer
     if (BIT_CHECK(LOOP_TIMER, BIT_TIMER_1HZ)) //Once per second)
     {
@@ -333,6 +336,10 @@ void loop()
     DIAG7=0;
     DIAG8=0;
 #endif
+#if defined (CORE_TEENSY) //debug purpose, only visal for running code
+    digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
+#endif
+
     } //1Hz timer
 
     if( (configPage6.iacAlgorithm == IAC_ALGORITHM_STEP_OL) || (configPage6.iacAlgorithm == IAC_ALGORITHM_STEP_CL) )  { idleControl(); } //Run idlecontrol every loop for stepper idle.

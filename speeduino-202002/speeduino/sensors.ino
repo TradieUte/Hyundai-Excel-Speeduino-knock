@@ -497,6 +497,7 @@ void flexPulse()
  * The interrupt function for pulses from a knock conditioner / controller
  * 
  */
+/*
 void knockPulse()
 {
   //Check if this the start of a knock. 
@@ -509,7 +510,7 @@ void knockPulse()
   else { ++knockCounter; } //Knock has already started, so just increment the counter for this
 
 }
-
+*/
 uint16_t readAuxanalog(uint8_t analogPin)
 {
   //read the Aux analog value for pin set by analogPin 

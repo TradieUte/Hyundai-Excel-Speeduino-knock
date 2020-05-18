@@ -176,6 +176,11 @@ void initialiseAll()
     knockWindowDurationTable.xSize = 6;
     knockWindowDurationTable.values = configPage10.knock_window_dur;
     knockWindowDurationTable.axisX = configPage10.knock_window_rpms;
+    knockWindowSensivityTable.valueSize = SIZE_BYTE;
+    knockWindowSensivityTable.axisSize = SIZE_BYTE; //Set this table to use byte axis bins
+    knockWindowSensivityTable.xSize = 6;
+    knockWindowSensivityTable.values = configPage10.knock_window_sensitivity;
+    knockWindowSensivityTable.axisX = configPage10.knock_window_rpms;
 
     //Setup the calibration tables
     loadCalibration();
@@ -228,16 +233,16 @@ void initialiseAll()
     // longest permissable tach duration is 50% of time between ign events used for tacho pulse
     // if calculated time is greater than TunerStudio pulse duration, then use TS pulse duration
 
-    int max_calc_duration = 0;  // microsec
+    int maxCalcDuration = 0;  // microsec
     int rev_cutoff = configPage4.HardRevLim * 100;
 
     // PIT clock - 60MHz - PIT counts down to 0 for interrupt
-    tach_pulse_duration =  (configPage2.tachoDuration * 1000 * 60) - 1; // pulse duration from TS, convert to uS (mS x 1000 x 60)
+    tachPulseDuration =  (configPage2.tachoDuration * 1000 * 60) - 1; // pulse duration from TS, convert to uS (mS x 1000 x 60)
     // longest duration in uS for max revs at nCyl and 50% dc
-    max_calc_duration = (60000000)/((rev_cutoff/60) * configPage2.nCylinders) - 1;
-    if (max_calc_duration < tach_pulse_duration)
+    maxCalcDuration = (60000000)/((rev_cutoff/60) * configPage2.nCylinders) - 1;
+    if (maxCalcDuration < tachPulseDuration)
     {
-      tach_pulse_duration = max_calc_duration;
+      tachPulseDuration = maxCalcDuration;
     }
 #endif
     //Set the tacho output default state
@@ -250,6 +255,10 @@ void initialiseAll()
     initialiseAuxPWM();
     initialiseCorrections();
     initialiseADC();
+    if (configPage10.knock_mode != KNOCK_MODE_OFF)
+    {
+      initialiseKnock();
+    }
 
     //Lookup the current MAP reading for barometric pressure
     instanteneousMAPReading();
@@ -1913,13 +1922,13 @@ void setPinMapping(byte boardID)
       pinFan = 35;      //Pin for the fan output
       pinIMCC = 29;     //Intake Manifold Charge Control (Ford L6 Barra)        
       pinKnockWin = 24; // Integrate/Hold for TPC8101
+      CS0 = 32;         // Chip Select; Knock
+      CS1 = 33;         // Chip select; Flash
+      CS2 = 15;         // Chip select; FlyByWire Throttle
+      SCK0 = 14;        // Flash, Knock and Throttle Clock (alternate clock)
       //Reserved pins on Teensy
-      // CS0 on D32;    // Chip Select; Knock
-      // CS1 on D33;    // Chip select; Flash
-      // CS2 on D15;    // Chip select; FlyByWire Throttle
       // MISO0 on D12
       // MOSI0 on D11
-      // SCK0 on D14;   // Flash, Knock and Throttle Clock (alternate clock)
       break;    
     #endif
 
@@ -2263,6 +2272,10 @@ void setPinMapping(byte boardID)
   pinMode(pinBoost, OUTPUT);
   pinMode(pinVVT_1, OUTPUT);
   pinMode(pinVVT_2, OUTPUT);
+  pinMode(CS0, OUTPUT);  // Chip Select; Knock
+  pinMode(CS1, OUTPUT);  // Chip select; Flash
+  pinMode(CS2, OUTPUT);  // Chip select; FlyByWire Throttle
+
 
   //This is a legacy mode option to revert the MAP reading behaviour to match what was in place prior to the 201905 firmware
   if(configPage2.legacyMAP > 0) { digitalWrite(pinMAP, HIGH); }
