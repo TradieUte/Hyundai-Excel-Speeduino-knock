@@ -313,6 +313,10 @@ void loop()
     {
       BIT_CLEAR(TIMER_mask, BIT_TIMER_1HZ);
       readBaro(); //Infrequent baro readings are not an issue.
+#if defined (DIAG)
+    Serial3.printf("D1=%d D2=%d D3=%d D4=%D\n", DIAG1,DIAG2,DIAG3,DIAG4);
+    DIAG1=DIAG2=DIAG3=DIAG4=0;
+#endif
     } //1Hz timer
 
     if( (configPage6.iacAlgorithm == IAC_ALGORITHM_STEP_OL) || (configPage6.iacAlgorithm == IAC_ALGORITHM_STEP_CL) )  { idleControl(); } //Run idlecontrol every loop for stepper idle.

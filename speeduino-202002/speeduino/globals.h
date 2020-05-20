@@ -3,6 +3,13 @@
 #include <Arduino.h>
 #include "table.h"
 #include <assert.h>
+//#define DIAG=1;
+#if defined (DIAG)
+  int DIAG1=0;
+  int DIAG2=0;
+  int DIAG3=0;
+  int DIAG4=0;
+#endif
 
 #if defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__) || defined(__AVR_ATmega2561__)
   #define BOARD_DIGITAL_GPIO_PINS 54
@@ -14,7 +21,6 @@
   #define IGN_CHANNELS 5
 
   //#define TIMER5_MICROS
-
 #elif defined(CORE_TEENSY)
   #if defined(__MK64FX512__) || defined(__MK66FX1M0__)
     #define CORE_TEENSY35
