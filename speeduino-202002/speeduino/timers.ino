@@ -63,6 +63,7 @@ void oneMSInterval() //Most ARM chips can simply call a function
   if(ignitionSchedule4.Status == RUNNING) { if( (ignitionSchedule4.startTime < targetOverdwellTime) && (configPage4.useDwellLim) && (isCrankLocked != true) ) { ign4EndFunction(); ignitionSchedule4.Status = OFF; } }
   if(ignitionSchedule5.Status == RUNNING) { if( (ignitionSchedule5.startTime < targetOverdwellTime) && (configPage4.useDwellLim) && (isCrankLocked != true) ) { ign5EndFunction(); ignitionSchedule5.Status = OFF; } }
 
+#if !defined (CORE_TEENSY)
   //Tacho output check
   //Tacho is flagged as being ready for a pulse by the ignition outputs. 
   if(tachoOutputFlag == READY)
@@ -70,7 +71,7 @@ void oneMSInterval() //Most ARM chips can simply call a function
     //Check for half speed tacho
     if( (configPage2.tachoDiv == 0) || (tachoAlt == true) ) 
     { 
-      TACHO_PULSE_LOW();
+      TACHO_PULSE_HIGH();
       //ms_counter is cast down to a byte as the tacho duration can only be in the range of 1-6, so no extra resolution above that is required
       tachoEndTime = (uint8_t)ms_counter + configPage2.tachoDuration;
       tachoOutputFlag = ACTIVE;
@@ -91,7 +92,7 @@ void oneMSInterval() //Most ARM chips can simply call a function
       tachoOutputFlag = DEACTIVE;
     }
   }
-  
+#endif  
 
 
   //30Hz loop

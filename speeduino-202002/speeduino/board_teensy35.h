@@ -132,6 +132,11 @@
   #define IDLE_TIMER_DISABLE() FTM2_C0SC &= ~FTM_CSC_CHIE
 
   static inline void idleInterrupt();
+  
+/*
+  New tacho
+ */
+static inline void startTacho(void);
 
 /*
 ***********************************************************************************************************

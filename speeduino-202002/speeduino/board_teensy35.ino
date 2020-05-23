@@ -11,6 +11,27 @@ void initBoard()
     ***********************************************************************************************************
     * General
     */
+  
+    /*
+      ***********************************************************************************************************
+      * Timers
+      */
+    SIM_SCGC6 |= SIM_SCGC6_PIT; // enable PIT clock (60MHz)
+    __asm__ volatile("nop");    // e7914, Mask 1N83J, Errata
+    PIT_MCR = 0;                // enable PIT
+
+    // Use PIT0 for 1mS interval   (free running)
+    PIT_LDVAL0 = 0xEA5F; // 1mS (count down by 60,000 - 1)
+    PIT_TFLG0 = 1;       // clear any interrupts
+    NVIC_ENABLE_IRQ(IRQ_PIT_CH0);
+    PIT_TCTRL0 |= PIT_TCTRL_TIE; // enable interrupt;
+    PIT_TCTRL0 |= PIT_TCTRL_TEN; // timer 0 enable
+
+    // Use PIT1 for Tacho duration (oneshot)
+    PIT_LDVAL1 = tach_pulse_duration;
+    PIT_TFLG1 = 1;               // clear any interrupts
+    PIT_TCTRL1 |= PIT_TCTRL_TIE; // enable interrupt;
+    NVIC_ENABLE_IRQ(IRQ_PIT_CH1);
 
     /*
     ***********************************************************************************************************
@@ -151,13 +172,6 @@ void initBoard()
 
     /*
     ***********************************************************************************************************
-    * Timers
-    */
-    //Uses the PIT timer on Teensy.
-    lowResTimer.begin(oneMSInterval, 1000);
-
-    /*
-    ***********************************************************************************************************
     * Schedules
     */
 
@@ -282,6 +296,35 @@ void initBoard()
     // enable IRQ Interrupt
     NVIC_ENABLE_IRQ(IRQ_FTM0);
     NVIC_ENABLE_IRQ(IRQ_FTM3);
+}
+
+void pit0_isr() // free running one mS timer
+{
+  PIT_TFLG0 = 1; // clear interrupt - loads timer value, restarts timer countdown
+  oneMSInterval();
+}
+
+void pit1_isr() // Tach pulse end (oneshot)
+{
+  PIT_TCTRL1 &= ~PIT_TCTRL_TEN; // disable PIT1
+  PIT_TFLG1 = 1;                // clear interrupt flag - reloads (fixed) countdown value from PIT_LDVAL1
+  TACHO_PULSE_HIGH();
+}
+
+static inline void startTacho(void) // skip pulses if required
+{
+  if (skipFlag == 0)
+  {
+    skipFlag=skip_pulse_val;
+    TACHO_PULSE_LOW();
+    PIT_LDVAL1 = tach_pulse_duration;
+    PIT_TCTRL1 |= PIT_TCTRL_TEN; // start PIT1
+                                 //    skipFlag = skip_pulse_val;
+  }
+  else
+  {
+    skipFlag--;
+  }
 }
 
 uint16_t freeRam()

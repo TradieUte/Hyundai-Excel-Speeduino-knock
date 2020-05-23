@@ -22,6 +22,10 @@
 
   //#define TIMER5_MICROS
 #elif defined(CORE_TEENSY)
+  volatile int tach_pulse_duration = 30000; // high speed tacho, uSec (60 x 500)
+  volatile byte skipFlag = 0;   // high speed tacho
+  volatile byte skip_pulse_val = 0; // high speed tacho
+
   #if defined(__MK64FX512__) || defined(__MK66FX1M0__)
     #define CORE_TEENSY35
     #define BOARD_H "board_teensy35.h"

@@ -315,7 +315,10 @@ void loop()
       readBaro(); //Infrequent baro readings are not an issue.
 #if defined (DIAG)
     Serial3.printf("D1=%d D2=%d D3=%d D4=%D\n", DIAG1,DIAG2,DIAG3,DIAG4);
-    DIAG1=DIAG2=DIAG3=DIAG4=0;
+    DIAG1=0;
+    DIAG2=0;
+    DIAG3=0;
+    DIAG4=0;
 #endif
     } //1Hz timer
 
