@@ -39,7 +39,7 @@ uint16_t correctionsDwell(uint16_t dwell);
 extern uint16_t AFRnextCycle;
 extern unsigned long knockStartTime;
 extern byte lastKnockCount;
-extern int16_t knockWindowMin; //The current minimum crank angle for a knock pulse to be valid
-extern int16_t knockWindowMax;//The current maximum crank angle for a knock pulse to be valid
+extern int16_t knockWindowDelay; //The current minimum crank angle for a knock pulse to be valid
+extern int16_t knockWindowSize;//The current maximum crank angle for a knock pulse to be valid
 
 #endif // CORRECTIONS_H

@@ -1383,7 +1383,7 @@
         <constant digits="1" name="n2o_stage2_adderMax" units="ms">1.5</constant>
         <constant digits="0" name="n2o_stage2_retard" units="Deg">5.0</constant>
         <constant name="knock_mode">"Digital"</constant>
-        <constant name="knock_pin">"3"</constant>
+        <constant name="knock_pin">"0"</constant>
         <constant name="knock_trigger">"LOW"</constant>
         <constant name="knock_pullup">"Off"</constant>
         <constant name="knock_limiterDisable">"No"</constant>

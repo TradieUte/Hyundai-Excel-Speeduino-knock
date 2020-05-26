@@ -1851,35 +1851,28 @@ void setPinMapping(byte boardID)
 
     #if defined(CORE_TEENSY35)
     case 57:
-          //Pin mappings as per the teensy 3.5 X3V0.1 board shield
-      //firing order 1234
-//      pinInjector1 = 5; // HW INJ1
-//      pinInjector2 = 4; // HW INJ2
-//      pinInjector3 = 3; // HW INJ3
-//      pinInjector4 = 2; // HW INJ4
+      //Pin mappings as per the teensy 3.5 X3V0.x board shield
       // firing order 1342
       pinInjector1 = 5; // HW INJ1
       pinInjector2 = 3; // HW INJ3
-      pinInjector3 = 2; // HW INJ4
-      pinInjector4 = 4; // HW INJ2
+      pinInjector3 = 4; // HW INJ4
+      pinInjector4 = 2; // HW INJ2
 
-      pinCoil1 = 14;  // wasted spark HW 1&4 (orig)
-      pinCoil2 = 15;  // wasted spark HW 3&2 (orig)
-//      pinCoil1 = 15;  // wasted spark HW 1&4 
-//      pinCoil2 = 14;  // wasted spark HW 3&2
-      pinTrigger = 32;  //Dig in CKP pin
-      pinTrigger2 = 39; //Dig in Cam Sensor pin
-      pinTPS = A6;     //Analog- TPS input pin - not used with Ford Barra
-      pinMAP = A9;     //Analog- MAP sensor pin
-      pinIAT = A4;     //Analog- IAT sensor pin
-      pinCLT = A5;     //Analog- CLT sensor pin
-      pinO2 =  A8;      //Analog- O2 sensor pin
-      pinBat = A12;     //Analog- Battery reference voltage pin
-      pinTachOut = 25;  //Tacho output pin
-      pinIdle1 = 9;    //Single wire idle control
-      pinIdle2 = 10;    //2 wire idle control
-      pinFuelPump = 24; //Fuel pump output
-      pinFan = 11;      //Pin for the fan output
+      pinCoil1 = 14;    // wasted spark HW 1&4 (orig)
+      pinCoil2 = 15;    // wasted spark HW 3&2 (orig)
+      pinTrigger = 32;  // CKP pin
+      pinTrigger2 = 39; // Cam Sensor pin
+      pinTPS = A6;      // TPS input pin - not used with Ford Barra
+      pinMAP = A9;      // MAP sensor pin
+      pinIAT = A4;      // IAT sensor pin
+      pinCLT = A5;      // CLT sensor pin
+      pinO2 =  A8;      // O2 sensor pin
+      pinBat = A12;     // Battery reference voltage pin
+      pinTachOut = 25;  // Tacho output pin
+      pinIdle1 = 9;     // Single wire idle control
+      pinIdle2 = 10;    // 2 wire idle control
+      pinFuelPump = 24; // Fuel pump output
+      pinFan = 11;      // Pin for the fan output
 
       break;
  
@@ -1901,26 +1894,26 @@ void setPinMapping(byte boardID)
       pinCoil6 = 16;
       pinCoil7 = 30;
       pinCoil8 = 31;      
-      pinVVT_1 = 3;     //PWM pin
-      pinVVT_2 = 4;     //PWM pin      
-      pinTrigger = 26;  //Dig in CAS pin
-      pinTrigger2 = 28; //Dig in ECam Sensor pin
-      pinTrigger3 = 27; //Dig in ICam Sensor pin     
-      pinTPS = A10;     //Analog- TPS input pin - not used with Ford Barra
-      pinMAP = A15;     //Analog- MAP sensor pin
-      pinIAT = A19;     //Analog- IAT sensor pin
-      pinCLT = A18;     //Analog- CLT sensor pin
-      pinO2 =  A21;      //Analog- O2 sensor pin
-      pinO2_2 = A23;    //Analog- O2 sensor pin (second sensor)
-      pinBat = A22;     //Analog- Battery reference voltage pin
-      pinBaro = A11;    //Analog- Baro sensor pin - ONLY WITH DB
-      pinTachOut = 2;  //Tacho output pin
-      pinBoost = 40;    //Boost control
-      pinFuelPump = 36; //Fuel pump output
+      pinVVT_1 = 3;     // VVT1 pin
+      pinVVT_2 = 4;     // VVT2 pin      
+      pinTrigger = 26;  // CAS pin
+      pinTrigger2 = 28; // ECam Sensor pin
+      pinTrigger3 = 27; // ICam Sensor pin     
+      pinTPS = A10;     // TPS input pin - not used with Ford Barra
+      pinMAP = A15;     // MAP sensor pin
+      pinIAT = A19;     // IAT sensor pin
+      pinCLT = A18;     // CLT sensor pin
+      pinO2 =  A21;     // O2 sensor pin
+      pinO2_2 = A23;    // O2-2 sensor pin
+      pinBat = A22;     // Battery reference voltage pin
+      pinBaro = A11;    // Baro sensor pin - ONLY WITH DB
+      pinTachOut = 2;   // Tacho output pin
+      pinBoost = 40;    // Boost control
+      pinFuelPump = 36; // Fuel pump output
       pinLaunch = 25;   // Input
-      pinFlex = 39;     //Flex sensor (Must be external interrupt enabled)
-      pinFan = 35;      //Pin for the fan output
-      pinIMCC = 29;     //Intake Manifold Charge Control (Ford L6 Barra)        
+      pinFlex = 39;     // Flex sensor (Must be external interrupt enabled)
+      pinFan = 35;      // Pin for the fan output
+      pinIMCC = 29;     // Intake Manifold Charge Control (Ford L6 Barra)        
       pinKnockWin = 24; // Integrate/Hold for TPC8101
       CS0 = 32;         // Chip Select; Knock
       CS1 = 33;         // Chip select; Flash
@@ -2349,6 +2342,10 @@ void setPinMapping(byte boardID)
   tach_pin_mask = digitalPinToBitMask(pinTachOut);
   pump_pin_port = portOutputRegister(digitalPinToPort(pinFuelPump));
   pump_pin_mask = digitalPinToBitMask(pinFuelPump);
+#if defined(CORE_TEENSY)
+  knock_win_pin_port = portOutputRegister(digitalPinToPort(pinKnockWin));
+  knock_win_pin_mask = digitalPinToBitMask(pinKnockWin);
+#endif
 
   //And for inputs
   #if defined(CORE_STM32)

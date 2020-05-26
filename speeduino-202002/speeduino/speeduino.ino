@@ -306,11 +306,13 @@ void loop()
           } //Channel type
         } //For loop going through each channel
       } //aux channels are enabled
-    
-    if (configPage10.knock_mode)
+
+#if defined (CORE_TEENSY)    
+    if ((configPage10.knock_mode) &&(currentStatus.hasSync))
     {
-      refreshKnockParameters();
+      void refreshKnockParameters();
     }
+#endif
 
     } //4Hz timer
     if (BIT_CHECK(LOOP_TIMER, BIT_TIMER_1HZ)) //Once per second)
@@ -318,15 +320,15 @@ void loop()
       BIT_CLEAR(TIMER_mask, BIT_TIMER_1HZ);
       readBaro(); //Infrequent baro readings are not an issue.
 #if defined (DIAG)
-    Serial1.printf(" BRD %d CYL %d IGN %d INJ %d\n",configPage2.pinMapping,configPage2.nCylinders,configPage4.sparkMode,configPage2.injLayout);
-    if (DIAG1) {Serial1.printf("D1 %U\n",DIAG1);}
-    if (DIAG2) {Serial1.printf("D2 %U\n",DIAG2);}
-    if (DIAG3) {Serial1.printf("D3 %U\n",DIAG3);}
-    if (DIAG4) {Serial1.printf("D4 %U\n",DIAG4);}
-    if (DIAG5) {Serial1.printf("D5 %U\n",DIAG5);}
-    if (DIAG6) {Serial1.printf("D6 %U\n",DIAG6);}
-    if (DIAG7) {Serial1.printf("D7 %U\n",DIAG7);}
-    if (DIAG8) {Serial1.printf("D8 %U\n",DIAG8);}
+    Serial1.printf("BRD %d CYL %d IGN %d INJ %d\n",configPage2.pinMapping,configPage2.nCylinders,configPage4.sparkMode,configPage2.injLayout);
+    if (DIAG1) {Serial1.printf("D1 %u\n",DIAG1);}
+    if (DIAG2) {Serial1.printf("D2 %u\n",DIAG2);}
+    if (DIAG3) {Serial1.printf("D3 %u\n",DIAG3);}
+    if (DIAG4) {Serial1.printf("D4 %u\n",DIAG4);}
+    if (DIAG5) {Serial1.printf("D5 %u\n",DIAG5);}
+    if (DIAG6) {Serial1.printf("D6 %u\n",DIAG6);}
+    if (DIAG7) {Serial1.printf("D7 %u\n",DIAG7);}
+    if (DIAG8) {Serial1.printf("D8 %u\n",DIAG8);}
     DIAG1=0;
     DIAG2=0;
     DIAG3=0;
@@ -669,7 +671,7 @@ void loop()
 
       //***********************************************************************************************
       //| BEGIN IGNITION CALCULATIONS
-      if (currentStatus.RPM > ((unsigned int)(configPage4.HardRevLim) * 100) ) { BIT_SET(currentStatus.spark, BIT_SPARK_HRDLIM); } //Hardcut RPM limit
+      if (currentStatus.RPM > ((unsigned int)(configPage4.HardRevLim) * 100) ) { BIT_SET(currentStatus.spark, BIT_SPARK_HRDLIM);} //Hardcut RPM limit
       else { BIT_CLEAR(currentStatus.spark, BIT_SPARK_HRDLIM); }
 
 
@@ -899,6 +901,8 @@ void loop()
       //Check for any of the hard cut rev limits being on
       if(currentStatus.launchingHard || BIT_CHECK(currentStatus.spark, BIT_SPARK_BOOSTCUT) || BIT_CHECK(currentStatus.spark, BIT_SPARK_HRDLIM) || currentStatus.flatShiftingHard)
       {
+DIAG7=7;
+DIAG8=configPage2.hardCutType+1;
         if(configPage2.hardCutType == HARD_CUT_FULL) { ignitionOn = false; }
         else 
         { 

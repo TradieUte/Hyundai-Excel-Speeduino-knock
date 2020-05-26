@@ -64,41 +64,41 @@
   #define IGN7_COMPARE  FTM3_C6V
   #define IGN8_COMPARE  FTM3_C7V
 
-  #define FUEL1_TIMER_ENABLE() FTM0_C0SC |= FTM_CSC_CHIE //Write 1 to the CHIE (Channel Interrupt Enable) bit of channel 0 Status/Control
-  #define FUEL2_TIMER_ENABLE() FTM0_C1SC |= FTM_CSC_CHIE
-  #define FUEL3_TIMER_ENABLE() FTM0_C2SC |= FTM_CSC_CHIE
-  #define FUEL4_TIMER_ENABLE() FTM0_C3SC |= FTM_CSC_CHIE
-  #define FUEL5_TIMER_ENABLE() FTM3_C0SC |= FTM_CSC_CHIE
-  #define FUEL6_TIMER_ENABLE() FTM3_C1SC |= FTM_CSC_CHIE
-  #define FUEL7_TIMER_ENABLE() FTM3_C2SC |= FTM_CSC_CHIE
-  #define FUEL8_TIMER_ENABLE() FTM3_C3SC |= FTM_CSC_CHIE
+  #define FUEL1_TIMER_ENABLE() FTM0_C0SC |= FTM_CSC_MSA //Write 1 to the MSA (channel compare) bit of channel 0 Status/Control
+  #define FUEL2_TIMER_ENABLE() FTM0_C1SC |= FTM_CSC_MSA
+  #define FUEL3_TIMER_ENABLE() FTM0_C2SC |= FTM_CSC_MSA
+  #define FUEL4_TIMER_ENABLE() FTM0_C3SC |= FTM_CSC_MSA
+  #define FUEL5_TIMER_ENABLE() FTM3_C0SC |= FTM_CSC_MSA
+  #define FUEL6_TIMER_ENABLE() FTM3_C1SC |= FTM_CSC_MSA
+  #define FUEL7_TIMER_ENABLE() FTM3_C2SC |= FTM_CSC_MSA
+  #define FUEL8_TIMER_ENABLE() FTM3_C3SC |= FTM_CSC_MSA
 
-  #define FUEL1_TIMER_DISABLE() FTM0_C0SC &= ~FTM_CSC_CHIE //Write 0 to the CHIE (Channel Interrupt Enable) bit of channel 0 Status/Control
-  #define FUEL2_TIMER_DISABLE() FTM0_C1SC &= ~FTM_CSC_CHIE
-  #define FUEL3_TIMER_DISABLE() FTM0_C2SC &= ~FTM_CSC_CHIE
-  #define FUEL4_TIMER_DISABLE() FTM0_C3SC &= ~FTM_CSC_CHIE
-  #define FUEL5_TIMER_DISABLE() FTM3_C0SC &= ~FTM_CSC_CHIE //Write 0 to the CHIE (Channel Interrupt Enable) bit of channel 0 Status/Control
-  #define FUEL6_TIMER_DISABLE() FTM3_C1SC &= ~FTM_CSC_CHIE
-  #define FUEL7_TIMER_DISABLE() FTM3_C2SC &= ~FTM_CSC_CHIE
-  #define FUEL8_TIMER_DISABLE() FTM3_C3SC &= ~FTM_CSC_CHIE
+  #define FUEL1_TIMER_DISABLE() FTM0_C0SC &= ~FTM_CSC_MSA //Write 0 to the MSA (channel compare) bit of channel 0 Status/Control
+  #define FUEL2_TIMER_DISABLE() FTM0_C1SC &= ~FTM_CSC_MSA
+  #define FUEL3_TIMER_DISABLE() FTM0_C2SC &= ~FTM_CSC_MSA
+  #define FUEL4_TIMER_DISABLE() FTM0_C3SC &= ~FTM_CSC_MSA
+  #define FUEL5_TIMER_DISABLE() FTM3_C0SC &= ~FTM_CSC_MSA 
+  #define FUEL6_TIMER_DISABLE() FTM3_C1SC &= ~FTM_CSC_MSA
+  #define FUEL7_TIMER_DISABLE() FTM3_C2SC &= ~FTM_CSC_MSA
+  #define FUEL8_TIMER_DISABLE() FTM3_C3SC &= ~FTM_CSC_MSA
 
-  #define IGN1_TIMER_ENABLE() FTM0_C4SC |= FTM_CSC_CHIE
-  #define IGN2_TIMER_ENABLE() FTM0_C5SC |= FTM_CSC_CHIE
-  #define IGN3_TIMER_ENABLE() FTM0_C6SC |= FTM_CSC_CHIE
-  #define IGN4_TIMER_ENABLE() FTM0_C7SC |= FTM_CSC_CHIE
-  #define IGN5_TIMER_ENABLE() FTM3_C4SC |= FTM_CSC_CHIE
-  #define IGN6_TIMER_ENABLE() FTM3_C5SC |= FTM_CSC_CHIE
-  #define IGN7_TIMER_ENABLE() FTM3_C6SC |= FTM_CSC_CHIE
-  #define IGN8_TIMER_ENABLE() FTM3_C7SC |= FTM_CSC_CHIE
+  #define IGN1_TIMER_ENABLE() FTM0_C4SC |= FTM_CSC_MSA
+  #define IGN2_TIMER_ENABLE() FTM0_C5SC |= FTM_CSC_MSA
+  #define IGN3_TIMER_ENABLE() FTM0_C6SC |= FTM_CSC_MSA
+  #define IGN4_TIMER_ENABLE() FTM0_C7SC |= FTM_CSC_MSA
+  #define IGN5_TIMER_ENABLE() FTM3_C4SC |= FTM_CSC_MSA
+  #define IGN6_TIMER_ENABLE() FTM3_C5SC |= FTM_CSC_MSA
+  #define IGN7_TIMER_ENABLE() FTM3_C6SC |= FTM_CSC_MSA
+  #define IGN8_TIMER_ENABLE() FTM3_C7SC |= FTM_CSC_MSA
 
-  #define IGN1_TIMER_DISABLE() FTM0_C4SC &= ~FTM_CSC_CHIE
-  #define IGN2_TIMER_DISABLE() FTM0_C5SC &= ~FTM_CSC_CHIE
-  #define IGN3_TIMER_DISABLE() FTM0_C6SC &= ~FTM_CSC_CHIE
-  #define IGN4_TIMER_DISABLE() FTM0_C7SC &= ~FTM_CSC_CHIE
-  #define IGN5_TIMER_DISABLE() FTM3_C4SC &= ~FTM_CSC_CHIE
-  #define IGN6_TIMER_DISABLE() FTM3_C5SC &= ~FTM_CSC_CHIE
-  #define IGN7_TIMER_DISABLE() FTM3_C6SC &= ~FTM_CSC_CHIE
-  #define IGN8_TIMER_DISABLE() FTM3_C7SC &= ~FTM_CSC_CHIE
+  #define IGN1_TIMER_DISABLE() FTM0_C4SC &= ~FTM_CSC_MSA
+  #define IGN2_TIMER_DISABLE() FTM0_C5SC &= ~FTM_CSC_MSA
+  #define IGN3_TIMER_DISABLE() FTM0_C6SC &= ~FTM_CSC_MSA
+  #define IGN4_TIMER_DISABLE() FTM0_C7SC &= ~FTM_CSC_MSA
+  #define IGN5_TIMER_DISABLE() FTM3_C4SC &= ~FTM_CSC_MSA
+  #define IGN6_TIMER_DISABLE() FTM3_C5SC &= ~FTM_CSC_MSA
+  #define IGN7_TIMER_DISABLE() FTM3_C6SC &= ~FTM_CSC_MSA
+  #define IGN8_TIMER_DISABLE() FTM3_C7SC &= ~FTM_CSC_MSA
 
   #define MAX_TIMER_PERIOD 139808 // 2.13333333uS * 65535
   #define uS_TO_TIMER_COMPARE(uS) ((uS * 15) >> 5) //Converts a given number of uS into the required number of timer ticks until that time has passed.
@@ -144,17 +144,6 @@
  */
 static inline void startTacho(void);  // includes skip setup
 
-/*
-  Knock Stuff
- */
-static inline void launchKnockWindow();
-void initialiseKnock();
-uint8_t sendCmd(uint8_t);
-//static inline void getKnockValue();
-volatile int knock_threshold = 0;
-volatile byte rpmModGain = 0; // gain as a function of rpm
-volatile bool knockRecoveryFirstStepDelay = false;
-
 // SPI commands for TPIC8101
 #define PS_SDO_STAT_CMD  0b01000110 // 8MHz in, SDO active
 #define CHAN1_SEL_CMD    0b11100000 // channel 1
@@ -165,18 +154,6 @@ volatile bool knockRecoveryFirstStepDelay = false;
 #define ADV_MODE_CMD     0b01110001 // switch to advanced mode
 #define REQUEST_LOW_BYTE     0b01000110 // (when in advanced mode)
 #define REQUEST_HIGH_BYTE    0b11100000 // (when in advanced mode)
-
-// TPIC8101 values
-int timeConst[] = {40,45,50,55,60,65,70,75,80,90,100,110,120,130,140,150,160,180,200,220,240,260,280,300,320,360,400,440,480,520,560,600};
-// the gainK array is inverted from that required by TPIC8101 to allow both timeConst and gainK to be searched with same routine. The array index of gainK from the search is adjusted when calculating rpmModGain.
-int gainK[] = {111,118,125,129,133,138,143,148,154,160,167,174,182,190,200,211,222,236,250,258,267,276,286,296,308,320,333,348,364,381,400,421,444,471,500,548,567,586,607,630,654,680,708,739,773,810,850,895,944,1000,1063,1143,1185,1231,1280,1333,1391,1455,1523,1600,1684,1778,1882,2000};
-byte getClosestIndex(int, int [], byte);
-byte closestIndex(int, int, int [], int);
-
-int16_t knockWindowSize = 0;  //The current crank angle delta that defines the knock window duration
-int16_t knockWindowDelay = 0; //The current crank angle after end of ign dwell for a knock pulse to be valid
-int16_t knockWindowGainFactor = 0;  // to control the sensor sensitivity as rpm (noise) increases
-volatile byte integrator_time_constant = 0;
 
 #endif //CORE_TEENSY
 #endif //TEENSY35_H

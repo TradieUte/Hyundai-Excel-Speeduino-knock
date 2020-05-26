@@ -200,7 +200,7 @@ void command()
         }
         
         // Detecting if the current page is a table/map
-        if ( (currentPage == veMapPage) || (currentPage == ignMapPage) || (currentPage == afrMapPage) || (currentPage == fuelMap2Page) ) { isMap = true; }
+        if ( (currentPage == veMapPage) || (currentPage == ignMapPage) || (currentPage == afrMapPage) || (currentPage == seqFuelPage) || (currentPage == boostvvtPage) || (currentPage == fuelMap2Page) ) { isMap = true; }
         else { isMap = false; }
         cmdPending = false;
       }
@@ -919,6 +919,26 @@ void receiveValue(uint16_t valueOffset, byte newValue)
         tempOffset = valueOffset - 232;
         stagingTable.axisY[(7 - tempOffset)] = int(newValue) * TABLE_LOAD_MULTIPLIER;
       }
+/*      
+  //vvt2 table
+      else if (valueOffset < 304) //New value is part of the vvt2 map
+      {
+        tempOffset = valueOffset - 240;
+        vvt2Table.values[7 - (tempOffset / 8)][tempOffset % 8] = newValue;
+      }
+      else if (valueOffset < 312) //New value is on the X (RPM) axis of the vvt2 table
+      {
+        tempOffset = valueOffset - 304;
+        vvt2Table.axisX[tempOffset] = int(newValue) * TABLE_RPM_MULTIPLIER; //The RPM values sent by TunerStudio are divided by 100, need to multiply it back by 100 to make it correct (TABLE_RPM_MULTIPLIER)
+      }
+      else if (valueOffset < 320) //New value is on the Y (Load) axis of the vvt2 table
+      {
+        tempOffset = valueOffset - 312;
+        vvt2Table.axisY[(7 - tempOffset)] = int(newValue); //TABLE_LOAD_MULTIPLIER is NOT used for vvt2 as it is TPS based (0-100)
+      }
+      //End of vvt2 table
+      vvt2Table.cacheIsValid = false; //Invalid the tables cache to ensure a lookup of new values
+*/
       boostTable.cacheIsValid = false; //Invalid the tables cache to ensure a lookup of new values
       vvtTable.cacheIsValid = false; //Invalid the tables cache to ensure a lookup of new values
       stagingTable.cacheIsValid = false; //Invalid the tables cache to ensure a lookup of new values
@@ -1056,6 +1076,11 @@ void sendPage()
       for (int x = 64; x < 72; x++) { response[x] = byte(stagingTable.axisX[(x - 64)] / TABLE_RPM_MULTIPLIER); }
       for (int y = 72; y < 80; y++) { response[y] = byte(stagingTable.axisY[7 - (y - 72)] / TABLE_LOAD_MULTIPLIER); }
       Serial.write((byte *)&response, 80);
+//      //VVT2 table
+//      for (int x = 0; x < 64; x++) { response[x] = vvt2Table.values[7 - (x / 8)][x % 8]; }
+//      for (int x = 64; x < 72; x++) { response[x] = byte(vvt2Table.axisX[(x - 64)] / TABLE_RPM_MULTIPLIER); }
+//      for (int y = 72; y < 80; y++) { response[y] = byte(vvt2Table.axisY[7 - (y - 72)]); }
+//      Serial.write((byte *)&response, 80);
       sendComplete = true;
       break;
     }
@@ -1159,7 +1184,7 @@ void sendPageASCII()
       uint16_t* pnt16_configPage;
       // To Display Values from Config Page 1
       // When casting to the __FlashStringHelper type Serial.println uses the same subroutine as when using the F macro
-      Serial.println((const __FlashStringHelper *)&pageTitles[27]);//27 is the index to the first char in the second sting in pageTitles
+      Serial.println((const __FlashStringHelper *)&pageTitles[8]);//8 is the index to the first char in the second sting in pageTitles
       // The following loop displays in human readable form of all byte values in config page 1 up to but not including the first array.
       // incrementing void pointers is cumbersome. Thus we have "pnt_configPage = (byte *)pnt_configPage + 1"
       for (pnt_configPage = (byte *)&configPage2; pnt_configPage < &configPage2.wueValues[0]; pnt_configPage = (byte *)pnt_configPage + 1) { Serial.println(*((byte *)pnt_configPage)); }
@@ -1184,13 +1209,13 @@ void sendPageASCII()
       break;
 
     case ignMapPage:
-      currentTitleIndex = 42;// the index to the first char of the third string in pageTitles
+      currentTitleIndex = 21;// the index to the first char of the third string in pageTitles
       currentTable = ignitionTable;
       break;
 
     case ignSetPage:
       //To Display Values from Config Page 2
-      Serial.println((const __FlashStringHelper *)&pageTitles[56]);
+      Serial.println((const __FlashStringHelper *)&pageTitles[35]);
       Serial.println(configPage4.triggerAngle);// configPsge2.triggerAngle is an int so just display it without complication
       // Following loop displays byte values after that first int up to but not including the first array in config page 2
       for (pnt_configPage = (byte *)&configPage4 + 1; pnt_configPage < &configPage4.taeBins[0]; pnt_configPage = (byte *)pnt_configPage + 1) { Serial.println(*((byte *)pnt_configPage)); }
@@ -1232,14 +1257,14 @@ void sendPageASCII()
       break;
 
     case afrMapPage:
-      currentTitleIndex = 71;//Array index to next string
+      currentTitleIndex = 48;//Array index to next string
       currentTable = afrTable;
       break;
 
     case afrSetPage:
-      //currentTitleIndex = 91;
+      //currentTitleIndex = 57;
       //To Display Values from Config Page 3
-      Serial.println((const __FlashStringHelper *)&pageTitles[91]);//special typecasting to enable suroutine that the F macro uses
+      Serial.println((const __FlashStringHelper *)&pageTitles[57]);//special typecasting to enable suroutine that the F macro uses
       for (pnt_configPage = (byte *)&configPage6; pnt_configPage < &configPage6.voltageCorrectionBins[0]; pnt_configPage = (byte *)pnt_configPage + 1)
       {
         Serial.println(*((byte *)pnt_configPage));// Displaying byte values of config page 3 up to but not including the first array
@@ -1278,8 +1303,8 @@ void sendPageASCII()
       sendComplete = true;
 
       //Old configPage4 STARTED HERE!
-      //currentTitleIndex = 106;
-      Serial.println((const __FlashStringHelper *)&pageTitles[106]);// F macro hack
+      //currentTitleIndex = 70;
+      Serial.println((const __FlashStringHelper *)&pageTitles[70]);// F macro hack
       for (byte y = 4; y; y--)// Display four equally sized arrays
       {
         byte * currentVar;
@@ -1322,11 +1347,13 @@ void sendPageASCII()
 
     case boostvvtPage:
       currentTable = boostTable;
-      currentTitleIndex = 121;
+      currentTitleIndex = 83;
       break;
 
     case seqFuelPage:
       currentTable = trim1Table;
+      currentTitleIndex = 158;
+/*
       for (int y = 0; y < currentTable.ySize; y++)
       {
         byte axisY = byte(currentTable.axisY[y]);
@@ -1357,12 +1384,13 @@ void sendPageASCII()
         Serial.println("");
       }
       sendComplete = true;
+*/
       break;
 
     case canbusPage:
-      //currentTitleIndex = 141;
+      //currentTitleIndex = 94;
       //To Display Values from Config Page 10
-      Serial.println((const __FlashStringHelper *)&pageTitles[103]);//special typecasting to enable suroutine that the F macro uses
+      Serial.println((const __FlashStringHelper *)&pageTitles[94]);//special typecasting to enable suroutine that the F macro uses
       for (pnt_configPage = &configPage9; pnt_configPage < ( (byte *)&configPage9 + npage_size[canbusPage]); pnt_configPage = (byte *)pnt_configPage + 1)
       {
         Serial.println(*((byte *)pnt_configPage));// Displaying byte values of config page 9 up to but not including the first array
@@ -1371,15 +1399,22 @@ void sendPageASCII()
       break;
 
     case warmupPage:
-      //NOT WRITTEN YET
       #ifndef SMALL_FLASH_MODE
-        Serial.println(F("\nPage has not been implemented yet"));
+    //currentTitleIndex = 102;
+    //currentTable = warmup page;
+    //To Display Values from Config Page 10
+    Serial.println((const __FlashStringHelper *)&pageTitles[102]); //special typecasting to enable suroutine that the F macro uses
+    for (pnt_configPage = &configPage10; pnt_configPage < ((byte *)&configPage10 + npage_size[warmupPage]); pnt_configPage = (byte *)pnt_configPage + 1)
+    {
+      Serial.println(*((byte *)pnt_configPage)); // Displaying byte values of config page 10
+    }
+  //      Serial.println(F("\nPage has not been implemented yet"));
       #endif
       sendComplete = true;
       break;
 
     case fuelMap2Page:
-      currentTitleIndex = 117;// the index to the first char of the third string in pageTitles
+      currentTitleIndex = 116;// the index to the first char of the third string in pageTitles
       currentTable = fuelTable2;
       break;
 
@@ -1448,14 +1483,94 @@ void sendPageASCII()
           Serial.write(spaceChar);
         }
         Serial.println();
-        if(currentTitleIndex == 121) //Check to see if on boostTable
+        switch (currentTitleIndex)
         {
-          currentTitleIndex = 132; //Change over to vvtTable mid display
-          currentTable = vvtTable;
+          case 83: // boostTable complete
+            currentTitleIndex = 126; // setup for next table
+            currentTable = vvtTable;
+            break;
+        
+          case 126: // vvt table complete
+            currentTitleIndex = 136;
+            currentTable = stagingTable;
+            break;
+
+//          case 136: //  staging table complete
+//           currentTitleIndex = 148;
+//            currentTable = boostTable;
+//            break;
+          case 136: //  staging table complete
+           currentTitleIndex = 0; // drop out of loop
+            break;
+     
+//          case 148: // vvt2 table complete
+//            currentTitleIndex = 0; // drop out of loop
+//            break;
+
+          
+          case 158: // FuelTrim 1 table complete
+            currentTitleIndex = 170;
+            currentTable = trim2Table;
+            break;
+          
+          case 170: // FuelTrim 2 table complete
+            currentTitleIndex = 182;
+            currentTable = trim3Table;
+            break;
+          
+          case 182: // FuelTrim 3 table complete
+            currentTitleIndex = 194;
+            currentTable = trim4Table;
+            break;
+
+//          #if (INJ_CHANNELS >= 6)
+
+//          case 194: // FuelTrim 4 table complete
+//            currentTitleIndex = 206;
+//            currentTable = trim5Table;
+//            break;
+
+//          case 206: // FuelTrim 5 table complete
+//            currentTitleIndex = 218;
+//            currentTable = trim6Table;
+//            break;
+          
+//          case 218: // FuelTrim 6 table complete
+//            currentTitleIndex = 230;
+//            currentTable = trim7Table;
+//            break;
+          
+//           case 230: // FuelTrim 7 table complete
+//            currentTitleIndex = 242;
+//            currentTable = trim8Table;
+//            break;
+          
+//          case 242: // FuelTrim 8 table complete
+//            currentTitleIndex = 0;  // drop out of loop
+//            break;
+
+//          #else
+                    
+          case 194: // FuelTrim 4 table complete
+            currentTitleIndex = 0;
+            break;
+
+//          #endif
+         
+         default:
+            currentTitleIndex = 0;  // drop out of loop
+            break;
         }
-        else { currentTitleIndex = 0; }
-      } while(currentTitleIndex == 132); //Should never loop unless going to display vvtTable
-    } //is map
+      } while (currentTitleIndex != 0); 
+    }
+//        if(currentTitleIndex == 121) //Check to see if on boostTable
+//        {
+//          currentTitleIndex = 132; //Change over to vvtTable mid display
+//          currentTable = vvtTable;
+//        }
+//        else { currentTitleIndex = 0; }
+//      } while(currentTitleIndex == 132); //Should never loop unless going to display vvtTable
+//    } //is map
     else
     {
       /*if(useChar)
@@ -1556,6 +1671,14 @@ byte getPageValue(byte page, uint16_t valueAddress)
             else if(tempAddress < 72) { returnValue = byte(stagingTable.axisX[(tempAddress - 64)] / TABLE_RPM_MULTIPLIER); }
             else if(tempAddress < 80) { returnValue = byte(stagingTable.axisY[7 - (tempAddress - 72)] / TABLE_LOAD_MULTIPLIER); }
           }
+//else
+//    {
+//      tempAddress = valueAddress - 240;
+//      //vvt2 table
+//      if (tempAddress < 64) { returnValue = vvt2Table.values[7 - (tempAddress / 8)][tempAddress % 8]; }
+//      else if (tempAddress < 72) { returnValue = byte(vvt2Table.axisX[(tempAddress - 64)] / TABLE_RPM_MULTIPLIER); }
+//      else if (tempAddress < 80) { returnValue = byte(vvt2Table.axisY[7 - (tempAddress - 72)]); }
+//    }
         }
         break;
 

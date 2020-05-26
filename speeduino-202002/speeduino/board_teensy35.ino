@@ -80,7 +80,7 @@ void initBoard()
 
     /*
     ***********************************************************************************************************
-    * PI Timers
+    * Programable Interrupt Timers (PIT)
     */
     SIM_SCGC6 |= SIM_SCGC6_PIT; // enable PIT clock (60MHz)
     __asm__ volatile("nop");    // e7914, Mask 1N83J, Errata
@@ -97,6 +97,16 @@ void initBoard()
     PIT_TFLG1 = 1;               // clear any interrupts
     PIT_TCTRL1 |= PIT_TCTRL_TIE; // enable interrupt;
     NVIC_ENABLE_IRQ(IRQ_PIT_CH1);
+
+    // Use PIT2 for Knock window start (oneshot)
+    PIT_TFLG2 = 1;               // clear any interrupts
+    PIT_TCTRL2 |= PIT_TCTRL_TIE; // enable interrupt;
+    NVIC_ENABLE_IRQ(IRQ_PIT_CH2);
+
+    // Use PIT3 for Knock window duration (oneshot)
+    PIT_TFLG3 = 1;               // clear any interrupts
+    PIT_TCTRL3 |= PIT_TCTRL_TIE; // enable interrupt;
+    NVIC_ENABLE_IRQ(IRQ_PIT_CH3);
 
     /*
     ***********************************************************************************************************
@@ -175,7 +185,7 @@ void initBoard()
     ***********************************************************************************************************
     * Schedules
     */
-/*
+
   //FlexTimer 0 is used for 4 ignition and 4 injection schedules. There are 8 channels on this module, so no other timers are needed
   FTM0_SC = 0x00;      // Set this to zero before changing the modulus
   FTM0_MOD = 0xFFFF;   //max modulus = 65535
@@ -184,31 +194,31 @@ void initBoard()
   FTM3_SC = 0x00;      // Set this to zero before changing the modulus
   FTM3_MOD = 0xFFFF;   //max modulus = 65535
 
-  *
-    * Enable the clock for FTM0/1
-    * 00 No clock selected. Disables the FTM counter.
-    * 01 System clock
-    * 10 Fixed frequency clock
-    * 11 External clock
-    *
+  //
+  //  * Enable the clock for FTM0/1
+  //  * 00 No clock selected. Disables the FTM counter.
+  //  * 01 System clock
+  //  * 10 Fixed frequency clock
+  //  * 11 External clock
+  //
   FTM0_SC |= FTM_SC_CLKS(0b1);
   FTM3_SC |= FTM_SC_CLKS(0b1);
 
-  *
-    * Set Prescaler
-    * This is the slowest that the timer can be clocked (Without used the slow timer, which is too slow). It results in ticks of 2.13333uS on the teensy 3.5:
-    * 60000000 Hz = F_BUS
-    * 128 * 1000000uS / F_BUS = 2.133uS
-    *
-    * 000 = Divide by 1
-    * 001 Divide by 2
-    * 010 Divide by 4
-    * 011 Divide by 8
-    * 100 Divide by 16
-    * 101 Divide by 32
-    * 110 Divide by 64
-    * 111 Divide by 128
-    *
+  //
+  //  * Set Prescaler
+  //  * This is the slowest that the timer can be clocked (Without used the slow timer, which is too slow). It results in ticks of 2.13333uS on the teensy 3.5:
+  //  * 60000000 Hz = F_BUS
+  //  * 128 * 1000000uS / F_BUS = 2.133uS
+  //  *
+  //  * 000 = Divide by 1
+  //  * 001 Divide by 2
+  //  * 010 Divide by 4
+  //  * 011 Divide by 8
+  //  * 100 Divide by 16
+  //  * 101 Divide by 32
+  //  * 110 Divide by 64
+  //  * 111 Divide by 128
+  //  
   FTM0_SC |= FTM_SC_PS(0b111);
   FTM3_SC |= FTM_SC_PS(0b111);
 
@@ -238,7 +248,7 @@ void initBoard()
 
   NVIC_ENABLE_IRQ(IRQ_FTM0);
   //increase interrupt priority (default 128, h/w serial 64, systick 0)
-  NVIC_SET_PRIORITY(IRQ_FTM0, 48); // higher priority than comms
+//  NVIC_SET_PRIORITY(IRQ_FTM0, 48); // higher priority than comms
 
 #if ( (INJ_CHANNELS>=5)&&(IGN_CHANNELS>=5) )
   FTM3_C0SC = 0; 
@@ -266,130 +276,9 @@ void initBoard()
   FTM3_C7SC |= FTM_CSC_CHIE; //Enable channel compare interrupt
 
   NVIC_ENABLE_IRQ(IRQ_FTM3);
-  NVIC_SET_PRIORITY(IRQ_FTM3, 48);
+//  NVIC_SET_PRIORITY(IRQ_FTM3, 48);
 #endif
-*/
-    //FlexTimer 0 is used for 4 ignition and 4 injection schedules. There are 8 channels on this module, so no other timers are needed
-    FTM0_MODE |= FTM_MODE_WPDIS; //Write Protection Disable
-    FTM0_MODE |= FTM_MODE_FTMEN; //Flex Timer module enable
-    FTM0_MODE |= FTM_MODE_INIT;
 
-    FTM0_SC = 0x00;      // Set this to zero before changing the modulus
-    FTM0_CNTIN = 0x0000; //Shouldn't be needed, but just in case
-    FTM0_CNT = 0x0000;   //Reset the count to zero
-    FTM0_MOD = 0xFFFF;   //max modulus = 65535
-
-    //FlexTimer 3 is used for schedules on channel 5+. Currently only channel 5 is used, but will likely be expanded later
-    FTM3_MODE |= FTM_MODE_WPDIS; //Write Protection Disable
-    FTM3_MODE |= FTM_MODE_FTMEN; //Flex Timer module enable
-    FTM3_MODE |= FTM_MODE_INIT;
-
-    FTM3_SC = 0x00;      // Set this to zero before changing the modulus
-    FTM3_CNTIN = 0x0000; //Shouldn't be needed, but just in case
-    FTM3_CNT = 0x0000;   //Reset the count to zero
-    FTM3_MOD = 0xFFFF;   //max modulus = 65535
-
-    /*
-    * Enable the clock for FTM0/1
-    * 00 No clock selected. Disables the FTM counter.
-    * 01 System clock
-    * 10 Fixed frequency clock
-    * 11 External clock
-    */
-    FTM0_SC |= FTM_SC_CLKS(0b1);
-    FTM3_SC |= FTM_SC_CLKS(0b1);
-
-    /*
-    * Set Prescaler
-    * This is the slowest that the timer can be clocked (Without used the slow timer, which is too slow). It results in ticks of 2.13333uS on the teensy 3.5:
-    * 60000000 Hz = F_BUS
-    * 128 * 1000000uS / F_BUS = 2.133uS
-    *
-    * 000 = Divide by 1
-    * 001 Divide by 2
-    * 010 Divide by 4
-    * 011 Divide by 8
-    * 100 Divide by 16
-    * 101 Divide by 32
-    * 110 Divide by 64
-    * 111 Divide by 128
-    */
-    FTM0_SC |= FTM_SC_PS(0b111);
-    FTM3_SC |= FTM_SC_PS(0b111);
-
-    //Setup the channels (See Pg 1014 of K64 DS).
-    //The are probably not needed as power on state should be 0
-    //FTM0_C0SC &= ~FTM_CSC_ELSB;
-    //FTM0_C0SC &= ~FTM_CSC_ELSA;
-    //FTM0_C0SC &= ~FTM_CSC_DMA;
-    FTM0_C0SC &= ~FTM_CSC_MSB; //According to Pg 965 of the K64 datasheet, this should not be needed as MSB is reset to 0 upon reset, but the channel interrupt fails to fire without it
-    FTM0_C0SC |= FTM_CSC_MSA;  //Enable Compare mode
-    FTM0_C0SC |= FTM_CSC_CHIE; //Enable channel compare interrupt
-
-    FTM0_C1SC &= ~FTM_CSC_MSB; //According to Pg 965 of the datasheet, this should not be needed as MSB is reset to 0 upon reset, but the channel interrupt fails to fire without it
-    FTM0_C1SC |= FTM_CSC_MSA;  //Enable Compare mode
-    FTM0_C1SC |= FTM_CSC_CHIE; //Enable channel compare interrupt
-
-    FTM0_C2SC &= ~FTM_CSC_MSB; //According to Pg 965 of the datasheet, this should not be needed as MSB is reset to 0 upon reset, but the channel interrupt fails to fire without it
-    FTM0_C2SC |= FTM_CSC_MSA;  //Enable Compare mode
-    FTM0_C2SC |= FTM_CSC_CHIE; //Enable channel compare interrupt
-
-    FTM0_C3SC &= ~FTM_CSC_MSB; //According to Pg 965 of the datasheet, this should not be needed as MSB is reset to 0 upon reset, but the channel interrupt fails to fire without it
-    FTM0_C3SC |= FTM_CSC_MSA;  //Enable Compare mode
-    FTM0_C3SC |= FTM_CSC_CHIE; //Enable channel compare interrupt
-
-    FTM0_C4SC &= ~FTM_CSC_MSB; //According to Pg 965 of the datasheet, this should not be needed as MSB is reset to 0 upon reset, but the channel interrupt fails to fire without it
-    FTM0_C4SC |= FTM_CSC_MSA;  //Enable Compare mode
-    FTM0_C4SC |= FTM_CSC_CHIE; //Enable channel compare interrupt
-
-    FTM0_C5SC &= ~FTM_CSC_MSB; //According to Pg 965 of the datasheet, this should not be needed as MSB is reset to 0 upon reset, but the channel interrupt fails to fire without it
-    FTM0_C5SC |= FTM_CSC_MSA;  //Enable Compare mode
-    FTM0_C5SC |= FTM_CSC_CHIE; //Enable channel compare interrupt
-
-    FTM0_C6SC &= ~FTM_CSC_MSB; //According to Pg 965 of the datasheet, this should not be needed as MSB is reset to 0 upon reset, but the channel interrupt fails to fire without it
-    FTM0_C6SC |= FTM_CSC_MSA;  //Enable Compare mode
-    FTM0_C6SC |= FTM_CSC_CHIE; //Enable channel compare interrupt
-
-    FTM0_C7SC &= ~FTM_CSC_MSB; //According to Pg 965 of the datasheet, this should not be needed as MSB is reset to 0 upon reset, but the channel interrupt fails to fire without it
-    FTM0_C7SC |= FTM_CSC_MSA;  //Enable Compare mode
-    FTM0_C7SC |= FTM_CSC_CHIE; //Enable channel compare interrupt
-
-    //Do the same, but on flex timer 3 (Used for channels 5-8)
-    FTM3_C0SC &= ~FTM_CSC_MSB; //According to Pg 965 of the K64 datasheet, this should not be needed as MSB is reset to 0 upon reset, but the channel interrupt fails to fire without it
-    FTM3_C0SC |= FTM_CSC_MSA;  //Enable Compare mode
-    FTM3_C0SC |= FTM_CSC_CHIE; //Enable channel compare interrupt
-
-    FTM3_C1SC &= ~FTM_CSC_MSB; //According to Pg 965 of the K64 datasheet, this should not be needed as MSB is reset to 0 upon reset, but the channel interrupt fails to fire without it
-    FTM3_C1SC |= FTM_CSC_MSA;  //Enable Compare mode
-    FTM3_C1SC |= FTM_CSC_CHIE; //Enable channel compare interrupt
-
-    FTM3_C2SC &= ~FTM_CSC_MSB; //According to Pg 965 of the K64 datasheet, this should not be needed as MSB is reset to 0 upon reset, but the channel interrupt fails to fire without it
-    FTM3_C2SC |= FTM_CSC_MSA;  //Enable Compare mode
-    FTM3_C2SC |= FTM_CSC_CHIE; //Enable channel compare interrupt
-
-    FTM3_C3SC &= ~FTM_CSC_MSB; //According to Pg 965 of the K64 datasheet, this should not be needed as MSB is reset to 0 upon reset, but the channel interrupt fails to fire without it
-    FTM3_C3SC |= FTM_CSC_MSA;  //Enable Compare mode
-    FTM3_C3SC |= FTM_CSC_CHIE; //Enable channel compare interrupt
-
-    FTM3_C4SC &= ~FTM_CSC_MSB; //According to Pg 965 of the K64 datasheet, this should not be needed as MSB is reset to 0 upon reset, but the channel interrupt fails to fire without it
-    FTM3_C4SC |= FTM_CSC_MSA;  //Enable Compare mode
-    FTM3_C4SC |= FTM_CSC_CHIE; //Enable channel compare interrupt
-
-    FTM3_C5SC &= ~FTM_CSC_MSB; //According to Pg 965 of the K64 datasheet, this should not be needed as MSB is reset to 0 upon reset, but the channel interrupt fails to fire without it
-    FTM3_C5SC |= FTM_CSC_MSA;  //Enable Compare mode
-    FTM3_C5SC |= FTM_CSC_CHIE; //Enable channel compare interrupt
-
-    FTM3_C6SC &= ~FTM_CSC_MSB; //According to Pg 965 of the K64 datasheet, this should not be needed as MSB is reset to 0 upon reset, but the channel interrupt fails to fire without it
-    FTM3_C6SC |= FTM_CSC_MSA;  //Enable Compare mode
-    FTM3_C6SC |= FTM_CSC_CHIE; //Enable channel compare interrupt
-
-    FTM3_C7SC &= ~FTM_CSC_MSB; //According to Pg 965 of the K64 datasheet, this should not be needed as MSB is reset to 0 upon reset, but the channel interrupt fails to fire without it
-    FTM3_C7SC |= FTM_CSC_MSA;  //Enable Compare mode
-    FTM3_C7SC |= FTM_CSC_CHIE; //Enable channel compare interrupt
-
-    // enable IRQ Interrupt
-    NVIC_ENABLE_IRQ(IRQ_FTM0);
-    NVIC_ENABLE_IRQ(IRQ_FTM3);
 }
 
 uint16_t freeRam()
@@ -422,45 +311,7 @@ void pit1_isr() // Tach pulse end (oneshot)
   TACHO_PULSE_LOW();
 }
 
-// PIT2 (oneshot) determines the time between ignition pulse end and knock window start
-// when PIT2 interrupts, start the knock window duration timer PIT3
-void pit2_isr() // window start delay end (oneshot)
-{
-  PIT_TCTRL2 &= ~PIT_TCTRL_TEN; // stop PIT2
-  PIT_TFLG2 = 1;                // clear interrupt flag - reloads countdown value from PIT_LDVAL2
-  // start knock window duration timer PIT3
-  PIT_LDVAL3 = 10000;
-  PIT_TCTRL3 |= PIT_TCTRL_TEN; // start PIT3
-  OPEN_KNOCK_WINDOW();
-}
-
-void pit3_isr() // knock window end (oneshot)
-{
-  byte lowByte;
-  byte highByte;
-  int knockValue = 0;
-
-  PIT_TCTRL3 &= ~PIT_TCTRL_TEN; // stop PIT3
-  PIT_TFLG3 = 1;                // clear interrupt flag - reloads countdown value from PIT_LDVAL3
-  CLOSE_KNOCK_WINDOW();
-  // get knock Value - takes 16 uSec with 2MHz clock
-  SPI.beginTransaction(knockSettings);
-  CS0_ASSERT();  
-  sendCmd(REQUEST_LOW_BYTE);  // also sets prescaler
-  lowByte = sendCmd(REQUEST_HIGH_BYTE); // also sets the channel
-  // rpmModGain and integrator_time_constant set once per second in main loop
-  highByte = sendCmd(INT_GAIN_CMD | rpmModGain); //  refresh gain - changes with rpm
-  sendCmd(INT_TC_CMD | integrator_time_constant); // refresh itc - changes with rpm
-  SPI.endTransaction();
-  knockValue = (knockValue | highByte) << 2; // already shifted 6 bits
-  knockValue |= lowByte;
-  if (knockValue > knock_threshold)
-  {
-    knockCounter++;
-  }
-}
-
-// called by each ignition isr at the end of the ign pulse
+// called by each ignition isr at the start of the ign pulse
 static inline void launchKnockWindow()
 {
   PIT_LDVAL2 = knockWindowStartDelay;
@@ -468,6 +319,47 @@ static inline void launchKnockWindow()
   PIT_TCTRL2 |= PIT_TCTRL_TEN; // start timer
 }
 
+// PIT2 (oneshot) determines the time between ignition pulse start and knock window start
+// when PIT2 interrupts, start the knock window duration timer PIT3
+void pit2_isr() // (oneshot)
+{
+  PIT_TCTRL2 &= ~PIT_TCTRL_TEN; // stop PIT2
+  PIT_TFLG2 = 1;                // clear interrupt flag
+  // start knock window duration timer PIT3
+  PIT_LDVAL3 = knockWindowDuration;
+  PIT_TCTRL3 |= PIT_TCTRL_TEN; // start PIT3
+  OPEN_KNOCK_WINDOW();  // on TPC8101
+}
+
+void pit3_isr() // knock window end (oneshot)
+{ 
+  uint8_t lowByte;
+  uint8_t highByte;
+  int knockValue = 0;
+
+  PIT_TCTRL3 &= ~PIT_TCTRL_TEN; // stop PIT3
+  PIT_TFLG3 = 1;                // clear interrupt flag - reloads countdown value from PIT_LDVAL3
+DIAG1=1;
+
+  CLOSE_KNOCK_WINDOW();
+  // get knock Value - takes 16 uSec with 2MHz clock
+  SPI.beginTransaction(knockSettings);
+  CS0_ASSERT();  
+  sendCmd(REQUEST_LOW_BYTE);  // also sets prescaler
+  lowByte = sendCmd(REQUEST_HIGH_BYTE); // also sets the channel
+  // rpmModGain_idx and integrator_time_constant_idx set in main loop (4Hz)
+  highByte = sendCmd(INT_GAIN_CMD | rpmModGain_idx); //  refresh gain - changes with rpm
+  sendCmd(INT_TC_CMD | integrator_time_constant_idx); // refresh itc - changes with rpm
+  SPI.endTransaction();
+  knockValue = (knockValue | highByte) << 2; // already shifted 6 bits
+  knockValue |= lowByte;
+DIAG2=knockValue;
+DIAG3=knock_threshold;
+  if (knockValue > knock_threshold)
+  {
+    knockCounter++;
+  }
+}
 
 static inline void startTacho(void) // skip pulses if required
 {

@@ -1,6 +1,7 @@
 #ifndef KNOCK_H
 #define KNOCK_H
 
+#if defined (CORE_TEENSY)
 #include "globals.h"
 
 static inline void launchKnockWindow();
@@ -8,7 +9,6 @@ void initialiseKnock();
 uint8_t sendCmd(uint8_t);
 //static inline void getKnockValue();
 volatile int knock_threshold = 0;
-volatile byte rpmModGain = 0; // gain as a function of rpm
 volatile bool knockRecoveryFirstStepDelay = false;
 // SPI commands for TPIC8101
 #define PS_SDO_STAT_CMD  0b01000110 // 8MHz in, SDO active
@@ -20,6 +20,7 @@ volatile bool knockRecoveryFirstStepDelay = false;
 #define ADV_MODE_CMD     0b01110001 // switch to advanced mode
 #define REQUEST_LOW_BYTE     0b01000110 // (when in advanced mode)
 #define REQUEST_HIGH_BYTE    0b11100000 // (when in advanced mode)
+SPISettings knockSettings;
 
 // TPIC8101 parameter values
 int timeConst[] = {\
@@ -27,8 +28,7 @@ int timeConst[] = {\
 160,180,200,220,240,260,280,300,320,360,400,440,480,520,560,600\
 };
 // the gainK array is inverted from that required by TPIC8101 to allow timeConst, gainK and bpFreq
-// to be searched with same routine. The values are scaled up by 1000; 111 is gain of 0.111.
-// Used with integer arithmetic, then re-scaled. 
+// to be searched with same routine. The values are scaled up from the TPIC8101 table by 1000; 111 is gain of 0.111.
 int gainK[] = {\
 111,118,125,129,133,138,143,148,154,160,167,174,182,190,200,211,\
 222,236,250,258,267,276,286,296,308,320,333,348,364,381,400,421,\
@@ -42,23 +42,25 @@ int bpFreq[] = {\
 495,512,529,548,568,590,612,637,664,694,727,763,802,846,895,950,\
 1012,1046,1083,1122,1165,1210,1260,1314,1372,1436,1507,1584,1671,1767,1876,1998\
 };
-byte getClosestIndex(int, int [], byte);
-byte closestIndex(int, int, int [], int);
+uint8_t getClosestIndex(int, int [], uint8_t);
+uint8_t closestIndex(int, int, int [], int);
 
 int16_t knockWindowSize = 0;  //The current crank angle delta that defines the knock window duration
 int16_t knockWindowDelay = 0; //The current crank angle after end of ign dwell for a knock pulse to be valid
+
 int16_t knockWindowGainFactor = 0;  // to control the sensor sensitivity as rpm (noise) increases
-volatile byte integrator_time_constant = 0;
+uint8_t band_pass_frequency_idx = 0;  // index from bpFreq array, used by TPIC8101
+volatile uint8_t integrator_time_constant_idx = 0; // index from timeConst array, used by TPIC8101
+volatile uint8_t rpmModGain_idx = 0;  // index from gainK array, used by TPIC8101
+int integratorGain = 0;
 
 #define OPEN_KNOCK_WINDOW() *knock_win_pin_port |= (knock_win_pin_mask) 
 #define CLOSE_KNOCK_WINDOW() *knock_win_pin_port &= ~(knock_win_pin_mask)
 #define CS0_ASSERT() digitalWrite(CS0, LOW)
 #define CS0_RELEASE() digitalWrite(CS0, HIGH)
-#define BAND_PASS_FREQUENCY 0xA  // 3.03KHz,  temp until included in configPage10
-#define KNOCK_GAIN  1             // temp until knockWindowGainTable implemented
-#define KNOCK_SENSOR_OUTPUT 2000     // temp until included in configPage10
 
 volatile uint32_t knockWindowStartDelay = 0;  // uSec
 volatile uint32_t knockWindowDuration = 0;    // uSec
-void refreshKnockParameters(void);
+//void refreshKnockParameters(void);
+#endif
 #endif

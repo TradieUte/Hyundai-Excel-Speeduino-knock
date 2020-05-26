@@ -548,11 +548,17 @@ void ftm2_isr(void)
 { 
   //FTM2 only has 2 compare channels
   //Use separate variables for each test to ensure conversion to bool
-  bool interrupt1 = (FTM2_C0SC & FTM_CSC_CHF);
-  bool interrupt2 = (FTM2_C1SC & FTM_CSC_CHF); //Not currently used
+//  bool interrupt1 = (FTM2_C0SC & FTM_CSC_CHF);
+//  bool interrupt2 = (FTM2_C1SC & FTM_CSC_CHF); //Not currently used
 
-  if(interrupt1) { FTM2_C0SC &= ~FTM_CSC_CHF; idleInterrupt(); }
-  else if(interrupt2) { FTM2_C1SC &= ~FTM_CSC_CHF; } //Add a callback function here if this is ever used
+//  if(interrupt1) { FTM2_C0SC &= ~FTM_CSC_CHF; idleInterrupt(); }
+//  else if(interrupt2) { FTM2_C1SC &= ~FTM_CSC_CHF; } //Add a callback function here if this is ever used
+  uint8_t status = FTM2_STATUS; // get both channels
+  FTM2_STATUS = 0x00; // clear both channels
+
+  if(status & FTM_STATUS_CH0F) { idleInterrupt(); }
+  if(status & FTM_STATUS_CH1F) { ; }
+
 }
 #elif defined(CORE_TEENSY40)
 //DO STUFF HERE

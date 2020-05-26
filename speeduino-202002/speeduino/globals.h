@@ -29,7 +29,7 @@
     #define CORE_TEENSY40
     #define BOARD_H "board_teensy40.h"
   #endif
-  #define DIAG
+  #define DIAG = 1
   #if defined (DIAG)
   volatile unsigned long DIAG1 = 0;
   volatile unsigned long DIAG2 = 0;
@@ -98,7 +98,6 @@
   #error Incorrect board selected. Please select the correct board (Usually Mega 2560) and upload again
 #endif
 
-SPISettings knockSettings;
 
 //This can only be included after the above section
 #include BOARD_H //Note that this is not a real file, it is defined in globals.h. 
@@ -431,15 +430,14 @@ extern volatile byte LOOP_TIMER;
 
 //These functions all do checks on a pin to determine if it is already in use by another (higher importance) function
 #if (INJ_CHANNELS >= 5)
-#define pinIsInjector(pin)  ( ((pin) == pinInjector1) || ((pin) == pinInjector2) || ((pin) == pinInjector3) || ((pin) == pinInjector4) )
+#define pinIsInjector(pin)  ( ((pin) == pinInjector1) || ((pin) == pinInjector2) || ((pin) == pinInjector3) || ((pin) == pinInjector4)  || ((pin) == pinInjector5) || ((pin) == pinInjector6) || ((pin) == pinInjector7) || ((pin) == pinInjector8))
 #else
-#define pinIsInjector(pin)  ( ((pin) == pinInjector1) || ((pin) == pinInjector2) || ((pin) == pinInjector3) || ((pin) == pinInjector4) || ((pin) == pinInjector5) || ((pin) == pinInjector6) || ((pin) == pinInjector7) || ((pin) == pinInjector8) )
+#define pinIsInjector(pin)  ( ((pin) == pinInjector1) || ((pin) == pinInjector2) || ((pin) == pinInjector3) || ((pin) == pinInjector4) )
 #endif
 #if (IGN_CHANNELS >= 5)
 #define pinIsIgnition(pin)  ( ((pin) == pinCoil1) || ((pin) == pinCoil2) || ((pin) == pinCoil3) || ((pin) == pinCoil4) || ((pin) == pinCoil5) || ((pin) == pinCoil6) || ((pin) == pinCoil7) || ((pin) == pinCoil8) )
 #else
-#define pin
-IsIgnition(pin)  ( ((pin) == pinCoil1) || ((pin) == pinCoil2) || ((pin) == pinCoil3) || ((pin) == pinCoil4) )
+#define pinIsIgnition(pin)  ( ((pin) == pinCoil1) || ((pin) == pinCoil2) || ((pin) == pinCoil3) || ((pin) == pinCoil4) )
 #endif
 #define pinIsSensor(pin)    ( ((pin) == pinCLT) || ((pin) == pinIAT) || ((pin) == pinMAP) || ((pin) == pinTPS) || ((pin) == pinO2) || ((pin) == pinBat) )
 #define pinIsUsed(pin)      ( pinIsInjector((pin)) || pinIsIgnition((pin)) || pinIsSensor((pin)) )
@@ -1021,8 +1019,8 @@ struct config10 {
   byte knock_window_angle[6]; //Bytes 103-108
   byte knock_window_dur[6]; //Bytes 109-114
   byte knock_window_sensitivity[6]; //Bytes 115-120
-  int band_pass_frequency; // Knock sensor centre frequency bytes 121,122
-  int knock_sensor_output; // Bytes 123, 124
+  uint16_t band_pass_frequency; // Knock sensor centre frequency bytes 121,122
+  uint16_t knock_sensor_output; // Bytes 123, 124
   byte knock_maxRetard; //Byte 125
   byte knock_firstStep; //Byte 126
   byte knock_stepSize; //Byte 127
@@ -1049,7 +1047,7 @@ struct config10 {
   byte vvtCLKD; // Byte 139
   uint16_t vvtCLMinAng; // Bytes 140, 141
   uint16_t vvtCLMaxAng;// Bytes 142, 143
-  byte unused11_144_191[44];
+  byte unused11_144_191[48];
 
 #if defined(CORE_AVR)
   };
