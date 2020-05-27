@@ -5,6 +5,7 @@
 #include "globals.h"
 
 static inline void launchKnockWindow();
+static inline void getKnockValue();
 void initialiseKnock();
 uint8_t sendCmd(uint8_t);
 //static inline void getKnockValue();
@@ -61,6 +62,6 @@ int integratorGain = 0;
 
 volatile uint32_t knockWindowStartDelay = 0;  // uSec
 volatile uint32_t knockWindowDuration = 0;    // uSec
-//void refreshKnockParameters(void);
+void refreshKnockParameters(void);
 #endif
 #endif

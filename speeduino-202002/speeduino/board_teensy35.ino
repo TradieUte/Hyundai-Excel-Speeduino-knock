@@ -98,6 +98,7 @@ void initBoard()
     PIT_TCTRL1 |= PIT_TCTRL_TIE; // enable interrupt;
     NVIC_ENABLE_IRQ(IRQ_PIT_CH1);
 
+#if defined (KNOCK)
     // Use PIT2 for Knock window start (oneshot)
     PIT_TFLG2 = 1;               // clear any interrupts
     PIT_TCTRL2 |= PIT_TCTRL_TIE; // enable interrupt;
@@ -107,7 +108,7 @@ void initBoard()
     PIT_TFLG3 = 1;               // clear any interrupts
     PIT_TCTRL3 |= PIT_TCTRL_TIE; // enable interrupt;
     NVIC_ENABLE_IRQ(IRQ_PIT_CH3);
-
+#endif
     /*
     ***********************************************************************************************************
     * Auxilliaries
@@ -319,6 +320,7 @@ static inline void launchKnockWindow()
   PIT_TCTRL2 |= PIT_TCTRL_TEN; // start timer
 }
 
+#if defined (KNOCK)
 // PIT2 (oneshot) determines the time between ignition pulse start and knock window start
 // when PIT2 interrupts, start the knock window duration timer PIT3
 void pit2_isr() // (oneshot)
@@ -333,33 +335,11 @@ void pit2_isr() // (oneshot)
 
 void pit3_isr() // knock window end (oneshot)
 { 
-  uint8_t lowByte;
-  uint8_t highByte;
-  int knockValue = 0;
-
   PIT_TCTRL3 &= ~PIT_TCTRL_TEN; // stop PIT3
   PIT_TFLG3 = 1;                // clear interrupt flag - reloads countdown value from PIT_LDVAL3
-DIAG1=1;
-
-  CLOSE_KNOCK_WINDOW();
-  // get knock Value - takes 16 uSec with 2MHz clock
-  SPI.beginTransaction(knockSettings);
-  CS0_ASSERT();  
-  sendCmd(REQUEST_LOW_BYTE);  // also sets prescaler
-  lowByte = sendCmd(REQUEST_HIGH_BYTE); // also sets the channel
-  // rpmModGain_idx and integrator_time_constant_idx set in main loop (4Hz)
-  highByte = sendCmd(INT_GAIN_CMD | rpmModGain_idx); //  refresh gain - changes with rpm
-  sendCmd(INT_TC_CMD | integrator_time_constant_idx); // refresh itc - changes with rpm
-  SPI.endTransaction();
-  knockValue = (knockValue | highByte) << 2; // already shifted 6 bits
-  knockValue |= lowByte;
-DIAG2=knockValue;
-DIAG3=knock_threshold;
-  if (knockValue > knock_threshold)
-  {
-    knockCounter++;
-  }
+  getKnockValue();
 }
+#endif
 
 static inline void startTacho(void) // skip pulses if required
 {

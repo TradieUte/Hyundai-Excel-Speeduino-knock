@@ -307,7 +307,7 @@ void loop()
         } //For loop going through each channel
       } //aux channels are enabled
 
-#if defined (CORE_TEENSY)    
+#if defined (KNOCK)    
     if ((configPage10.knock_mode) &&(currentStatus.hasSync))
     {
       void refreshKnockParameters();

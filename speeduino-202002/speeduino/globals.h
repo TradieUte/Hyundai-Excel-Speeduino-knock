@@ -29,7 +29,8 @@
     #define CORE_TEENSY40
     #define BOARD_H "board_teensy40.h"
   #endif
-  #define DIAG = 1
+  #define DIAG
+  #define KNOCK
   #if defined (DIAG)
   volatile unsigned long DIAG1 = 0;
   volatile unsigned long DIAG2 = 0;
