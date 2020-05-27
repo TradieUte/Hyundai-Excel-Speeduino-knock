@@ -66,7 +66,7 @@ void oneMSInterval() //Most ARM chips can simply call a function
   if(ignitionSchedule7.Status == RUNNING) { if( (ignitionSchedule7.startTime < targetOverdwellTime) && (configPage4.useDwellLim) && (isCrankLocked != true) ) { endCoil7Charge(); ignitionSchedule7.Status = OFF; } }
   if(ignitionSchedule8.Status == RUNNING) { if( (ignitionSchedule8.startTime < targetOverdwellTime) && (configPage4.useDwellLim) && (isCrankLocked != true) ) { endCoil8Charge(); ignitionSchedule8.Status = OFF; } }
 
-#if !defined (CORE_TEENSY)
+#if !defined (CORE_TEENSY)  // Teensy uses PIT for Tacho
   //Tacho output check
   //Tacho is flagged as being ready for a pulse by the ignition outputs. 
   if(tachoOutputFlag == READY)
@@ -95,9 +95,32 @@ void oneMSInterval() //Most ARM chips can simply call a function
       tachoOutputFlag = DEACTIVE;
     }
   }
-/*
-    // knock intervals all at 100ms in Tuner Studio
-    // knockCounter is incremented by pit3_isr
+#endif
+
+  //30Hz loop
+  if (loop33ms == 33)
+  {
+    loop33ms = 0;
+    BIT_SET(TIMER_mask, BIT_TIMER_30HZ);
+  }
+
+  //15Hz loop
+  if (loop66ms == 66)
+  {
+    loop66ms = 0;
+    BIT_SET(TIMER_mask, BIT_TIMER_15HZ);
+  }
+
+  //Loop executed every 100ms loop
+  //Anything inside this if statement will run every 100ms.
+  if (loop100ms == 100)
+  {
+    loop100ms = 0; //Reset counter
+    BIT_SET(TIMER_mask, BIT_TIMER_10HZ);
+
+#if defined(KNOCK)
+    // knock intervals all in 100ms increments in Tuner Studio
+    // knockCounter is incremented when using Teensy by pit3_isr
     // knockRetard is used for ignition corrections (corrections.ino)
     static int lastKnockCount = 1000; // arbitrarily large count to ensure first use is valid
     static int retardStepTime = 0;   // retard knock sample interval counter
@@ -150,7 +173,7 @@ void oneMSInterval() //Most ARM chips can simply call a function
           }
           knockRetard = knock_retard; // update global variable
         }
-        knockCounter = 0; // incremented by pit3_isr each time a knock is registered
+        knockCounter = 0; // incremented by pit3_isr (when using Teensy) each time a knock is registered
       }
       // advance spark - if knock just finished, wait advanceDelay before advancing
       if ( (currentStatus.knockActive == false) && (knockRetard > 0) && (--advanceDelay <= 0) ) // no knock; positive retard value; advance start delay expired
@@ -164,31 +187,8 @@ void oneMSInterval() //Most ARM chips can simply call a function
         advanceDelay = 0;
       }
     }
-*/
+
 #endif 
-  
-
-
-  //30Hz loop
-  if (loop33ms == 33)
-  {
-    loop33ms = 0;
-    BIT_SET(TIMER_mask, BIT_TIMER_30HZ);
-  }
-
-  //15Hz loop
-  if (loop66ms == 66)
-  {
-    loop66ms = 0;
-    BIT_SET(TIMER_mask, BIT_TIMER_15HZ);
-  }
-
-  //Loop executed every 100ms loop
-  //Anything inside this if statement will run every 100ms.
-  if (loop100ms == 100)
-  {
-    loop100ms = 0; //Reset counter
-    BIT_SET(TIMER_mask, BIT_TIMER_10HZ);
 
     currentStatus.rpmDOT = (currentStatus.RPM - lastRPM_100ms) * 10; //This is the RPM per second that the engine has accelerated/decelleratedin the last loop
     lastRPM_100ms = currentStatus.RPM; //Record the current RPM for next calc

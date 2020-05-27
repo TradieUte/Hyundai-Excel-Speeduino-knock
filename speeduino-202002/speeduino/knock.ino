@@ -96,7 +96,7 @@ DIAG2=knockValue;
 DIAG3=knock_threshold;
   if (knockValue > knock_threshold)
   {
-    knockCounter++;
+    knockCounter++; // used in 100 mS timer loop
   }
 }
 

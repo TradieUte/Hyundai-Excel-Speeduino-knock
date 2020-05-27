@@ -109,6 +109,7 @@ void initBoard()
     PIT_TCTRL3 |= PIT_TCTRL_TIE; // enable interrupt;
     NVIC_ENABLE_IRQ(IRQ_PIT_CH3);
 #endif
+
     /*
     ***********************************************************************************************************
     * Auxilliaries

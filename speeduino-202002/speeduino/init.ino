@@ -256,11 +256,12 @@ void initialiseAll()
     initialiseAuxPWM();
     initialiseCorrections();
     initialiseADC();
+#if defined (KNOCK)
     if (configPage10.knock_mode != KNOCK_MODE_OFF)
     {
       initialiseKnock();
     }
-
+#endif
     //Lookup the current MAP reading for barometric pressure
     instanteneousMAPReading();
     //barometric reading can be taken from either an external sensor if enabled, or simply by using the initial MAP value

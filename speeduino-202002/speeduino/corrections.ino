@@ -678,9 +678,9 @@ int8_t correctionSoftFlatShift(int8_t advance)
 
 int8_t correctionKnock(int8_t advance)
 {
-  byte knockRetard = 0;
+//  byte knockRetard = 0;
 
-  //First check is to do the window calculations (ASsuming knock is enabled)
+  //First check is to do the window calculations (Assuming knock is enabled)
   if( configPage10.knock_mode != KNOCK_MODE_OFF )
   {
 #if defined (CORE_TEENSY) 
@@ -702,8 +702,8 @@ int8_t correctionKnock(int8_t advance)
 // Convert degrees to PIT_countdown_val, PIT clock 60Mhz, counts down to 0
 // Timing algorithm ((60000000/(currentStatus.RPM/60)) * (number_of_degrees/360)) - 1
   uint32_t down_count = 10000000/currentStatus.RPM;
-  knockWindowStartDelay = (down_count * knockWindowDelay) - 1;
-  knockWindowDuration = (down_count * knockWindowSize) - 1; // uSec
+  knockWindowStartDelay = (down_count * knockWindowDelay) - 1;  // global (knockWindowDelay in deg)
+  knockWindowDuration = (down_count * knockWindowSize) - 1;     // global - (uSec knockWindowSize in deg)
 #else
     //
     if(knockCounter > configPage10.knock_count)
