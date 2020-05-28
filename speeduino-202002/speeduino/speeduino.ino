@@ -901,8 +901,6 @@ void loop()
       //Check for any of the hard cut rev limits being on
       if(currentStatus.launchingHard || BIT_CHECK(currentStatus.spark, BIT_SPARK_BOOSTCUT) || BIT_CHECK(currentStatus.spark, BIT_SPARK_HRDLIM) || currentStatus.flatShiftingHard)
       {
-DIAG7=7;
-DIAG8=configPage2.hardCutType+1;
         if(configPage2.hardCutType == HARD_CUT_FULL) { ignitionOn = false; }
         else 
         { 

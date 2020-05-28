@@ -17,6 +17,7 @@ Timers are typically low resolution (Compared to Schedulers), with maximum frequ
 #include "scheduledIO.h"
 #include "speeduino.h"
 #include "auxiliaries.h"
+#include "knock.h"
 
 #if defined(CORE_AVR)
   #include <avr/wdt.h>
@@ -126,6 +127,7 @@ void oneMSInterval() //Most ARM chips can simply call a function
     static int retardStepTime = 0;   // retard knock sample interval counter
     static int advanceStepTime = 0;  // retard recovery (advance) interval counter; incremented in advance process
     static int advanceDelay = 0;     // accumulates the delay between last no-knock condition and start of advance process
+    static bool reset = true;
     // algorithm first checks if retard is required, then allows advance to happen. The consequence is that 
     // the minimum advance recovery interval is set by the knock sample retard interval.
     if (configPage10.knock_mode != KNOCK_MODE_OFF)
@@ -135,30 +137,35 @@ void oneMSInterval() //Most ARM chips can simply call a function
         retardStepTime=0;
         if ((knockCounter <= configPage10.knock_count) || (currentStatus.RPM >= configPage10.knock_maxRPM*100) ||(currentStatus.MAP >= (configPage10.knock_maxMAP<<1)) ) // "no knock" condition (knockCounter incremented in pit3_isr)
         {
-          currentStatus.knockActive = false;
-          if (knockRecoveryFirstStepDelay == true)
+          if (reset == true)  // only do following when required
           {
-            knockRecoveryFirstStepDelay = false;
-            // the following ensures knock advance recovery process starts on time after last instance of knock,
-            // for any value of configPage10.knock_duration and configPage10.knock_recoveryStepTime
-            // delay can not be less than configPage10.knock_stepTime, as that has already occurred to arrive at this point
-            advanceDelay = configPage10.knock_duration - configPage10.knock_recoveryStepTime - configPage10.knock_stepTime;
-            if (advanceDelay <= 0)
+            reset = false;
+            currentStatus.knockActive = false;
+            if (knockRecoveryFirstStepDelay == true)
             {
-              advanceDelay = 0;
+              knockRecoveryFirstStepDelay = false;
+              // the following ensures knock advance recovery process starts on time after last instance of knock,
+              // for any value of configPage10.knock_duration and configPage10.knock_recoveryStepTime
+              // delay can not be less than configPage10.knock_stepTime, as that has already occurred to arrive at this point
+              advanceDelay = configPage10.knock_duration - configPage10.knock_recoveryStepTime - configPage10.knock_stepTime;
+              if (advanceDelay <= 0)
+              {
+                advanceDelay = 0;
               // configPage10.knock_stepTime is added to advanceStepTime, because that time has already passed to get here.
               advanceStepTime = configPage10.knock_recoveryStepTime - configPage10.knock_duration + configPage10.knock_stepTime; // for first step of recovery
             }
-          advanceStepTime = configPage10.knock_stepTime - configPage10.knock_recoveryStepTime;  // if knock check time greater than advance recovery step time
-          if (advanceStepTime <= 0) {advanceStepTime = configPage10.knock_recoveryStepTime;}    // setup for no advance recovery delay
+              advanceStepTime = configPage10.knock_stepTime - configPage10.knock_recoveryStepTime;  // if knock check time greater than advance recovery step time
+              if (advanceStepTime <= 0) {advanceStepTime = configPage10.knock_recoveryStepTime;}    // setup for no advance recovery delay
+            }
           }
         }
         else  // retard spark
         {
+          reset = true;
           currentStatus.knockActive = true;
           knockRecoveryFirstStepDelay = true; // setup for advance process
           int knock_retard = knockRetard; // do calcs on local variable knock_retard
-          if (knock_retard < configPage10.knock_maxRetard) // used in corrections.ino
+          if (knock_retard < configPage10.knock_maxRetard) // knockRetard used in corrections.ino
           {
             if ((knockCounter > lastKnockCount) || (knockCounter > (configPage10.knock_count << 4))) // high or increasing knock count
             {
@@ -178,6 +185,7 @@ void oneMSInterval() //Most ARM chips can simply call a function
       // advance spark - if knock just finished, wait advanceDelay before advancing
       if ( (currentStatus.knockActive == false) && (knockRetard > 0) && (--advanceDelay <= 0) ) // no knock; positive retard value; advance start delay expired
       {
+        reset = true;
         if (++advanceStepTime >= configPage10.knock_recoveryStepTime) // time, in 100mS increments, between advance steps
         {
           advanceStepTime = 0;

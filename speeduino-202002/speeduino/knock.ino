@@ -25,7 +25,7 @@ void initialiseKnock()
     knockSettings = SPISettings(1000000, MSBFIRST, SPI_MODE1);
     SPI.beginTransaction(knockSettings);
     ret = sendCmd(PS_SDO_STAT_CMD); // set prescaler for 8MHz input; SDO active
-    if (ret == PS_SDO_STAT_CMD)     // if not already in advanced mode, continue
+    if (ret == PS_SDO_STAT_CMD)     // if not already in advanced mode, continue. NB requires power off to change
     {
       sendCmd(CHAN1_SEL_CMD);       // select channel 1
       sendCmd(BPCF_CMD | band_pass_frequency_idx); // set bandpassCenterFrequency
@@ -92,8 +92,6 @@ static inline void getKnockValue()
   SPI.endTransaction();
   knockValue = (knockValue | highByte) << 2; // already shifted 6 bits
   knockValue |= lowByte;
-DIAG2=knockValue;
-DIAG3=knock_threshold;
   if (knockValue > knock_threshold)
   {
     knockCounter++; // used in 100 mS timer loop
