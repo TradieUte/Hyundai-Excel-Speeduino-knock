@@ -1011,7 +1011,7 @@ static inline void ignitionSchedule1Interrupt() //Most ARM chips can simply call
   {
     if (ignitionSchedule1.Status == PENDING) //Check to see if this schedule is turn on
     {
-#if defined (CORE_TEENSY) // new tacho code
+#if defined (CORE_TEENSY)
       startTacho();
       launchKnockWindow();
 #endif

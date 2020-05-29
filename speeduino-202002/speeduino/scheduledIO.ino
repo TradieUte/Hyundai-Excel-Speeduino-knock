@@ -11,7 +11,6 @@
 #define TACHO_OUTPUT_FLAG_READY tachoOutputFlag = READY
 #endif
 
-
 inline void beginCoil1Charge() { digitalWrite(pinCoil1, coilHIGH); TACHO_OUTPUT_FLAG_READY; }
 inline void endCoil1Charge() { digitalWrite(pinCoil1, coilLOW); }
 

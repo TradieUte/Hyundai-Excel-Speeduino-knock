@@ -192,10 +192,10 @@ void idleControl()
   {
     case IAC_ALGORITHM_NONE:       //Case 0 is no idle control ('None')
       break;
-
     case IAC_ALGORITHM_ONOFF:      //Case 1 is on/off idle control
       if ( (currentStatus.coolant + CALIBRATION_TEMPERATURE_OFFSET) < configPage6.iacFastTemp) //All temps are offset by 40 degrees
       {
+
         digitalWrite(pinIdle1, HIGH);
         idleOn = true;
         BIT_SET(currentStatus.spark, BIT_SPARK_IDLE); //Turn the idle control flag on
@@ -204,7 +204,7 @@ void idleControl()
       {
         digitalWrite(pinIdle1, LOW); 
         idleOn = false; 
-        BIT_CLEAR(currentStatus.spark, BIT_SPARK_IDLE); //Turn the idle control flag on
+        BIT_CLEAR(currentStatus.spark, BIT_SPARK_IDLE); //Turn the idle control flag off
       }
       break;
 

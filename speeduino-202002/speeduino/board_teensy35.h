@@ -132,7 +132,7 @@
   #define IDLE_TIMER_DISABLE() FTM2_C0SC &= ~FTM_CSC_CHIE
 
   static inline void idleInterrupt();
-
+  
 /*
 ***********************************************************************************************************
 * CAN / Second serial
@@ -143,6 +143,7 @@
   New tacho
  */
 static inline void startTacho(void);  // includes skip setup
+int tachPulseDuration;
 
 // SPI commands for TPIC8101
 #define PS_SDO_STAT_CMD  0b01000110 // 8MHz in, SDO active

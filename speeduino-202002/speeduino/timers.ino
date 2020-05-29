@@ -75,7 +75,7 @@ void oneMSInterval() //Most ARM chips can simply call a function
     //Check for half speed tacho
     if( (configPage2.tachoDiv == 0) || (tachoAlt == true) ) 
     { 
-      TACHO_PULSE_LOW();
+      TACHO_PULSE_HIGH();
       //ms_counter is cast down to a byte as the tacho duration can only be in the range of 1-6, so no extra resolution above that is required
       tachoEndTime = (uint8_t)ms_counter + configPage2.tachoDuration;
       tachoOutputFlag = ACTIVE;

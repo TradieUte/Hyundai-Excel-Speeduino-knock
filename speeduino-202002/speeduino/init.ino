@@ -45,6 +45,9 @@ void initialiseAll()
     initBoard(); //This calls the current individual boards init function. See the board_xxx.ino files for these.
     initialiseTimers();
 
+#if defined (DIAG)
+    Serial3.begin(115200);
+#endif
     Serial.begin(115200);
     if (configPage9.enable_secondarySerial == 1) { CANSerial.begin(115200); }
 
@@ -228,6 +231,40 @@ void initialiseAll()
     #if (INJ_CHANNELS >= 8)
     closeInjector8();
     #endif
+    
+#if defined (CORE_TEENSY)
+// setup for tacho pulse division and tacho pulse duration
+// longest permissable tach duration is 50% of time between ign events used for tacho pulse
+// if calculated time is greater than max duration, then use max duration
+// startTacho() uses 'skip_pulse_val' and 'tach_pulse_duration'
+
+  int max_calc_duration = 0;  // microsec
+  int rev_cutoff = configPage4.HardRevLim * 100;
+
+  // PIT clock - 60MHz - PIT counts down to 0 for interrupt
+  tach_pulse_duration =  (configPage2.tachoDuration * 1000 * 60) - 1; // Max val from TS, convert to uS (mS x 1000 x 60)
+  // longest duration in uS for max revs at nCyl and 50% dc
+  max_calc_duration = (60000000)/((rev_cutoff/60) * configPage2.nCylinders) - 1;
+  switch (configPage2.tachoDiv)
+  {
+    case 0:
+      skip_pulse_val = 0; // pulse on every ign event
+    break;
+
+    case 1:
+      skip_pulse_val = 1; // pulse on alternate ign events
+      max_calc_duration *= 2;
+    break;
+
+    default:
+      skip_pulse_val = 0;
+    break;
+  }
+  if (max_calc_duration < tach_pulse_duration)
+  {
+    tach_pulse_duration = max_calc_duration;
+  }
+#endif
 
 #if defined (CORE_TEENSY)
     // new tacho    
@@ -235,7 +272,6 @@ void initialiseAll()
     // if calculated time is greater than TunerStudio pulse duration, then use TS pulse duration
 
     int maxCalcDuration = 0;  // microsec
-    int rev_cutoff = configPage4.HardRevLim * 100;
 
     // PIT clock - 60MHz - PIT counts down to 0 for interrupt
     tachPulseDuration =  (configPage2.tachoDuration * 1000 * 60) - 1; // pulse duration from TS, convert to uS (mS x 1000 x 60)
@@ -247,7 +283,7 @@ void initialiseAll()
     }
 #endif
     //Set the tacho output default state
-    TACHO_PULSE_HIGH();
+//    digitalWrite(pinTachOut, HIGH); **** can't be here, pinTachOut not yet defined. ****
     //Perform all initialisations
     initialiseSchedulers();
     //initialiseDisplay();
@@ -972,6 +1008,8 @@ void initialiseAll()
       setFuelSchedule3(100, (primingValue * 100 * 5));
       setFuelSchedule4(100, (primingValue * 100 * 5));
     }
+    // set tacho default state
+    TACHO_PULSE_HIGH();
 
     initialisationComplete = true;
     digitalWrite(LED_BUILTIN, HIGH);
@@ -1853,29 +1891,28 @@ void setPinMapping(byte boardID)
 
     #if defined(CORE_TEENSY35)
     case 57:
-      //Pin mappings as per the teensy 3.5 X3V0.x board shield
-      // firing order 1342
+      //Pin mappings as per the teensy 3.5 X3V0.1 board shield
+      // firing order 1-3-4-2 (only affects injectors - using wasted spark)
       pinInjector1 = 5; // HW INJ1
       pinInjector2 = 3; // HW INJ3
       pinInjector3 = 4; // HW INJ4
       pinInjector4 = 2; // HW INJ2
+      pinCoil1 = 14;    // fire 1 & 3
+      pinCoil2 = 15;    // fire 2 & 4
 
-      pinCoil1 = 14;    // wasted spark HW 1&4 (orig)
-      pinCoil2 = 15;    // wasted spark HW 3&2 (orig)
-      pinTrigger = 32;  // CKP pin
+      pinTrigger = 32;  // Crank Sensor pin
       pinTrigger2 = 39; // Cam Sensor pin
-      pinTPS = A6;      // TPS input pin - not used with Ford Barra
+      pinTPS = A6;      // TPS input pin
       pinMAP = A9;      // MAP sensor pin
       pinIAT = A4;      // IAT sensor pin
       pinCLT = A5;      // CLT sensor pin
-      pinO2 =  A8;      // O2 sensor pin
+      pinO2 =  A8;      // Hego sensor pin
       pinBat = A12;     // Battery reference voltage pin
       pinTachOut = 25;  // Tacho output pin
-      pinIdle1 = 9;     // Single wire idle control
-      pinIdle2 = 10;    // 2 wire idle control
-      pinFuelPump = 24; // Fuel pump output
-      pinFan = 11;      // Pin for the fan output
-
+      pinIdle1 = 9;     // Single wire idle control pin
+      pinIdle2 = 10;    // Two wire idle control pin
+      pinFuelPump = 24; // Fuel pump output pin
+      pinFan = 11;      // Fan output pin
       break;
  
       case 58:
