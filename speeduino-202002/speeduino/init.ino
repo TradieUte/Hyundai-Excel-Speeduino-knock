@@ -46,13 +46,13 @@ void initialiseAll()
     initialiseTimers();
 
 #if defined (DIAG)
-    Serial3.begin(115200);
+    if (configPage2.pinMapping==57) {Serial3.begin(115200);}
 #endif
     Serial.begin(115200);
     if (configPage9.enable_secondarySerial == 1) { CANSerial.begin(115200); }
 
 #if defined (DIAG)
-    Serial1.begin(115200);
+    if (configPage2.pinMapping==58){Serial1.begin(115200);}
 #endif
     #if defined(CORE_STM32)
     configPage9.intcan_available = 1;   // device has internal canbus
