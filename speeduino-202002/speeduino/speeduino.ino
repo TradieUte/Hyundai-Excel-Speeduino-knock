@@ -308,7 +308,7 @@ void loop()
       } //aux channels are enabled
 
 #if defined (KNOCK)    
-    if ((configPage10.knock_mode) &&(currentStatus.hasSync))
+    if ((configPage10.knock_mode==KNOCK_MODE_DIGITAL) &&(currentStatus.hasSync))
     {
       void refreshKnockParameters();
     }

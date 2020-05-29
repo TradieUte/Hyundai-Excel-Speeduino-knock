@@ -120,15 +120,18 @@ void initBoard()
     NVIC_ENABLE_IRQ(IRQ_PIT_CH1);
 
 #if defined (KNOCK)
-    // Use PIT2 for Knock window start (oneshot)
-    PIT_TFLG2 = 1;               // clear any interrupts
-    PIT_TCTRL2 |= PIT_TCTRL_TIE; // enable interrupt;
-    NVIC_ENABLE_IRQ(IRQ_PIT_CH2);
+    if (configPage10.knock_mode == KNOCK_MODE_DIGITAL)
+    {
+      // Use PIT2 for Knock window start (oneshot)
+      PIT_TFLG2 = 1;               // clear any interrupts
+      PIT_TCTRL2 |= PIT_TCTRL_TIE; // enable interrupt;
+      NVIC_ENABLE_IRQ(IRQ_PIT_CH2);
 
-    // Use PIT3 for Knock window duration (oneshot)
-    PIT_TFLG3 = 1;               // clear any interrupts
-    PIT_TCTRL3 |= PIT_TCTRL_TIE; // enable interrupt;
-    NVIC_ENABLE_IRQ(IRQ_PIT_CH3);
+      // Use PIT3 for Knock window duration (oneshot)
+      PIT_TFLG3 = 1;               // clear any interrupts
+      PIT_TCTRL3 |= PIT_TCTRL_TIE; // enable interrupt;
+      NVIC_ENABLE_IRQ(IRQ_PIT_CH3);
+    }
 #endif
 
     /*
@@ -368,7 +371,7 @@ static inline void startTacho(void) // skip pulses if required
   if (skipFlag == 0)
   {
     skipFlag = configPage2.tachoDiv;
-    TACHO_PULSE_HIGH();
+    TACHO_PULSE_LOW();
     PIT_LDVAL1 = tachPulseDuration;
     PIT_TCTRL1 |= PIT_TCTRL_TEN; // start PIT1
   }

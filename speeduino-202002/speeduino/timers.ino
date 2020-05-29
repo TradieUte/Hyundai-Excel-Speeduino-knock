@@ -120,18 +120,19 @@ void oneMSInterval() //Most ARM chips can simply call a function
     BIT_SET(TIMER_mask, BIT_TIMER_10HZ);
 
 #if defined(KNOCK)
-    // knock intervals all in 100ms increments in Tuner Studio
-    // knockCounter is incremented when using Teensy by pit3_isr
-    // knockRetard is used for ignition corrections (corrections.ino)
-    static int lastKnockCount = 1000; // arbitrarily large count to ensure first use is valid
-    static int retardStepTime = 0;   // retard knock sample interval counter
-    static int advanceStepTime = 0;  // retard recovery (advance) interval counter; incremented in advance process
-    static int advanceDelay = 0;     // accumulates the delay between last no-knock condition and start of advance process
-    static bool reset = true;
-    // algorithm first checks if retard is required, then allows advance to happen. The consequence is that 
-    // the minimum advance recovery interval is set by the knock sample retard interval.
-    if (configPage10.knock_mode != KNOCK_MODE_OFF)
+    if (configPage10.knock_mode==KNOCK_MODE_DIGITAL)
     {
+      // knock intervals all in 100ms increments in Tuner Studio
+      // knockCounter is incremented when using Teensy by pit3_isr
+      // knockRetard is used for ignition corrections (corrections.ino)
+      static int lastKnockCount = 1000; // arbitrarily large count to ensure first use is valid
+      static int retardStepTime = 0;   // retard knock sample interval counter
+      static int advanceStepTime = 0;  // retard recovery (advance) interval counter; incremented in advance process
+      static int advanceDelay = 0;     // accumulates the delay between last no-knock condition and start of advance process
+      static bool reset = true;
+      // algorithm first checks if retard is required, then allows advance to happen. The consequence is that 
+      // the minimum advance recovery interval is set by the knock sample retard interval.
+
       if (++retardStepTime >= configPage10.knock_stepTime) // accumulate knock events during this time
       {
         retardStepTime=0;
@@ -194,7 +195,6 @@ void oneMSInterval() //Most ARM chips can simply call a function
         advanceDelay = 0;
       }
     }
-
 #endif 
 
     currentStatus.rpmDOT = (currentStatus.RPM - lastRPM_100ms) * 10; //This is the RPM per second that the engine has accelerated/decelleratedin the last loop

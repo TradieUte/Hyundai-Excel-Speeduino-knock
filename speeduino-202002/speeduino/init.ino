@@ -293,7 +293,7 @@ void initialiseAll()
     initialiseCorrections();
     initialiseADC();
 #if defined (KNOCK)
-    if (configPage10.knock_mode != KNOCK_MODE_OFF)
+    if (configPage10.knock_mode == KNOCK_MODE_DIGITAL)
     {
       initialiseKnock();
     }
