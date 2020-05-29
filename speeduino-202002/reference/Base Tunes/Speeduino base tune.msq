@@ -1427,12 +1427,12 @@
         <constant digits="0" name="band_pass_frequency" units="Hz">3000.0</constant>   
         <constant digits="0" name="knock_sensor_output" units="mV">300.0</constant>
         <constant digits="0" name="knock_maxRetard" units="Deg">3.0</constant>
-        <constant digits="0" name="knock_firstStep" units="Deg">1.0</constant>
-        <constant digits="0" name="knock_stepSize" units="Deg">2.0</constant>
+        <constant digits="0" name="knock_firstStep" units="Deg">2.0</constant>
+        <constant digits="0" name="knock_stepSize" units="Deg">1.0</constant>
         <constant digits="1" name="knock_stepTime" units="Sec">2.0</constant>
         <constant digits="1" name="knock_duration" units="Sec">0.2</constant>
         <constant digits="1" name="knock_recoveryStepTime" units="Sec">0.1</constant>
-        <constant digits="0" name="knock_recoveryStep" units="Deg">0.0</constant>
+        <constant digits="0" name="knock_recoveryStep" units="Deg">0.1</constant>
         <constant name="fuel2Algorithm">"MAP"</constant>
         <constant name="fuel2Mode">"Off"</constant>
         <constant name="fuel2SwitchVariable">"MAP"</constant>

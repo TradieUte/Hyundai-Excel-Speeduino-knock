@@ -190,7 +190,6 @@ void oneMSInterval() //Most ARM chips can simply call a function
         {
           advanceStepTime = 0;
           knockRetard -= configPage10.knock_recoveryStep;
-          if (knockRetard < 0) {knockRetard = 0;}
         }
         advanceDelay = 0;
       }
