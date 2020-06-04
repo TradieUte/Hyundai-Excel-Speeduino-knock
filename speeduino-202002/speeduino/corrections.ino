@@ -683,20 +683,19 @@ int8_t correctionKnock(int8_t advance)
   //First check is to do the window calculations (Assuming knock is enabled)
   if( configPage10.knock_mode != KNOCK_MODE_OFF )
   {
-#if defined (CORE_TEENSY) 
+#if defined (CORE_TEENSY)&&defined(KNOCK)
     int tsRpmVal = currentStatus.RPM/100; // to match value stored by Tuner Studio
     knockWindowDelay = table2D_getValue(&knockWindowStartTable, tsRpmVal);
     knockWindowSize = table2D_getValue(&knockWindowDurationTable, tsRpmVal);
-  }
 #else
     knockWindowMin = table2D_getValue(&knockWindowStartTable, currentStatus.RPM);
     knockWindowMax = knockWindowMin + table2D_getValue(&knockWindowDurationTable, currentStatus.RPM);
 #endif
-
+  }
 
   if( (configPage10.knock_mode == KNOCK_MODE_DIGITAL)  )
   {
-#if defined(CORE_TEENSY)
+#if defined(CORE_TEENSY)&&defined(KNOCK)
 // Each ign pulse isr starts PIT2 with knock window start countdown. PIT2 triggers PIT2 with knock window duration countdown
 // the following computes the countdown values.
 // Convert degrees to PIT_countdown_val, PIT clock 60Mhz, counts down to 0
