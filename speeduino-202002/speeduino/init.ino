@@ -45,13 +45,13 @@ void initialiseAll()
     initBoard(); //This calls the current individual boards init function. See the board_xxx.ino files for these.
     initialiseTimers();
 
-#if defined (DIAG)
+#if defined(DIAG)
     if (configPage2.pinMapping==57) {Serial3.begin(115200);}
 #endif
     Serial.begin(115200);
     if (configPage9.enable_secondarySerial == 1) { CANSerial.begin(115200); }
 
-#if defined (DIAG)
+#if defined(DIAG)
     if (configPage2.pinMapping==58){Serial1.begin(115200);}
 #endif
     #if defined(CORE_STM32)
@@ -231,42 +231,8 @@ void initialiseAll()
     #if (INJ_CHANNELS >= 8)
     closeInjector8();
     #endif
-    
-#if defined (CORE_TEENSY)
-// setup for tacho pulse division and tacho pulse duration
-// longest permissable tach duration is 50% of time between ign events used for tacho pulse
-// if calculated time is greater than max duration, then use max duration
-// startTacho() uses 'skip_pulse_val' and 'tach_pulse_duration'
 
-  int max_calc_duration = 0;  // microsec
-  int rev_cutoff = configPage4.HardRevLim * 100;
-
-  // PIT clock - 60MHz - PIT counts down to 0 for interrupt
-  tach_pulse_duration =  (configPage2.tachoDuration * 1000 * 60) - 1; // Max val from TS, convert to uS (mS x 1000 x 60)
-  // longest duration in uS for max revs at nCyl and 50% dc
-  max_calc_duration = (60000000)/((rev_cutoff/60) * configPage2.nCylinders) - 1;
-  switch (configPage2.tachoDiv)
-  {
-    case 0:
-      skip_pulse_val = 0; // pulse on every ign event
-    break;
-
-    case 1:
-      skip_pulse_val = 1; // pulse on alternate ign events
-      max_calc_duration *= 2;
-    break;
-
-    default:
-      skip_pulse_val = 0;
-    break;
-  }
-  if (max_calc_duration < tach_pulse_duration)
-  {
-    tach_pulse_duration = max_calc_duration;
-  }
-#endif
-
-#if defined (CORE_TEENSY)
+#if defined(CORE_TEENSY)
     // new tacho    
     // longest permissable tach duration is 50% of time between ign events used for tacho pulse
     // if calculated time is greater than TunerStudio pulse duration, then use TS pulse duration
@@ -282,6 +248,7 @@ void initialiseAll()
       tachPulseDuration = maxCalcDuration;
     }
 #endif
+
     //Set the tacho output default state
 //    digitalWrite(pinTachOut, HIGH); **** can't be here, pinTachOut not yet defined. ****
     //Perform all initialisations
@@ -292,7 +259,7 @@ void initialiseAll()
     initialiseAuxPWM();
     initialiseCorrections();
     initialiseADC();
-#if defined (KNOCK)
+#if defined(KNOCK)
     if (configPage10.knock_mode == KNOCK_MODE_DIGITAL)
     {
       initialiseKnock();

@@ -145,16 +145,5 @@
 static inline void startTacho(void);  // includes skip setup
 int tachPulseDuration;
 
-// SPI commands for TPIC8101
-#define PS_SDO_STAT_CMD  0b01000110 // 8MHz in, SDO active
-#define CHAN1_SEL_CMD    0b11100000 // channel 1
-#define CHAN2_SEL_CMD    0b11100001 // channel 2
-#define BPCF_CMD         0b00000000 // band pass center frequency SPI cmd
-#define INT_GAIN_CMD     0b10000000 // Integrator gain
-#define INT_TC_CMD       0b11000000 // Integrator Time constant
-#define ADV_MODE_CMD     0b01110001 // switch to advanced mode
-#define REQUEST_LOW_BYTE     0b01000110 // (when in advanced mode)
-#define REQUEST_HIGH_BYTE    0b11100000 // (when in advanced mode)
-
 #endif //CORE_TEENSY
 #endif //TEENSY35_H

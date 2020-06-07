@@ -119,7 +119,7 @@ void initBoard()
     PIT_TCTRL1 |= PIT_TCTRL_TIE; // enable interrupt;
     NVIC_ENABLE_IRQ(IRQ_PIT_CH1);
 
-#if defined (KNOCK)
+#if defined(KNOCK)
     if (configPage10.knock_mode == KNOCK_MODE_DIGITAL)
     {
       // Use PIT2 for Knock window start (oneshot)
@@ -459,7 +459,7 @@ void pit1_isr() // Tach pulse end (oneshot)
   TACHO_PULSE_HIGH();
 }
 
-// called by each ignition isr at the start of the ign pulse
+// called by each ignition isr at the end of the ign dwell
 static inline void launchKnockWindow()
 {
   PIT_LDVAL2 = knockWindowStartDelay;
@@ -467,7 +467,7 @@ static inline void launchKnockWindow()
   PIT_TCTRL2 |= PIT_TCTRL_TEN; // start timer
 }
 
-#if defined (KNOCK)
+#if defined(KNOCK)
 // PIT2 (oneshot) determines the time between ignition pulse start and knock window start
 // when PIT2 interrupts, start the knock window duration timer PIT3
 void pit2_isr() // (oneshot)
@@ -481,9 +481,10 @@ void pit2_isr() // (oneshot)
 }
 
 void pit3_isr() // knock window end (oneshot)
-{ 
+{
   PIT_TCTRL3 &= ~PIT_TCTRL_TEN; // stop PIT3
   PIT_TFLG3 = 1;                // clear interrupt flag - reloads countdown value from PIT_LDVAL3
+  CLOSE_KNOCK_WINDOW();
   getKnockValue();
 }
 #endif

@@ -18,7 +18,6 @@
 #elif defined(CORE_TEENSY)
   volatile int tach_pulse_duration = 30000; // high speed tacho, uSec (60 x 500)
   volatile byte skipFlag = 0;   // high speed tacho
-  volatile byte skip_pulse_val = 0; // high speed tacho
 
   #if defined(__MK64FX512__) || defined(__MK66FX1M0__)
     #define CORE_TEENSY35
@@ -30,7 +29,7 @@
   #endif
   #define DIAG
   #define KNOCK
-  #if defined (DIAG)
+  #if defined(DIAG)
   volatile unsigned long DIAG1 = 0;
   volatile unsigned long DIAG2 = 0;
   volatile unsigned long DIAG3 = 0;
@@ -39,7 +38,9 @@
   volatile unsigned long DIAG6 = 0;
   volatile unsigned long DIAG7 = 0;
   volatile unsigned long DIAG8 = 0;
- #endif
+volatile unsigned long told =0;
+
+#endif
   #define INJ_CHANNELS 6
   #define IGN_CHANNELS 6
 

@@ -19,7 +19,7 @@ Flood clear mode etc.
 #include "maths.h"
 #include "sensors.h"
 #include "src/PID_v1/PID_v1.h"
-#if defined (CORE_TEENSY)
+#if defined(CORE_TEENSY)
 #include "knock.h"
 #endif
 

@@ -67,7 +67,7 @@ void oneMSInterval() //Most ARM chips can simply call a function
   if(ignitionSchedule7.Status == RUNNING) { if( (ignitionSchedule7.startTime < targetOverdwellTime) && (configPage4.useDwellLim) && (isCrankLocked != true) ) { endCoil7Charge(); ignitionSchedule7.Status = OFF; } }
   if(ignitionSchedule8.Status == RUNNING) { if( (ignitionSchedule8.startTime < targetOverdwellTime) && (configPage4.useDwellLim) && (isCrankLocked != true) ) { endCoil8Charge(); ignitionSchedule8.Status = OFF; } }
 
-#if !defined (CORE_TEENSY)  // Teensy uses PIT for Tacho
+#if !defined(CORE_TEENSY)  // Teensy uses PIT for Tacho
   //Tacho output check
   //Tacho is flagged as being ready for a pulse by the ignition outputs. 
   if(tachoOutputFlag == READY)

@@ -1,4 +1,4 @@
-#if defined (KNOCK)
+//#if defined(KNOCK)
 #include "knock.h"
 #include "globals.h"
 #include "sensors.h"
@@ -42,7 +42,7 @@ void initialiseKnock()
   }
 }
 
-uint8_t sendCmd(uint8_t cmd)
+static inline uint8_t sendCmd(uint8_t cmd)
 {
   uint8_t val = 0;
   CS0_ASSERT();
@@ -63,7 +63,6 @@ void refreshKnockParameters() // must only be called when RPM > 0
   int itc = (double)knock_win_duration / 28.27; // uSec
   // integrator_time_constant_idx is the index to the internal TPIC8101 timeConst table
   integrator_time_constant_idx = getClosestIndex(itc, timeConst, (uint8_t)32); // timeConst[]
-
   // integrator gain is a constant, calculated at initialiseKnock()
   // Reduce gain with RPM, to compensate for increasing engine noise
   // This is an experiment to "fix" the timing retard that occurs in
@@ -79,8 +78,6 @@ static inline void getKnockValue()
   uint8_t lowByte;
   uint8_t highByte;
   int knockValue = 0;
-
-  CLOSE_KNOCK_WINDOW();
   // get knock Value - takes 16 uSec with 2MHz clock
   SPI.beginTransaction(knockSettings);
   CS0_ASSERT();  
@@ -96,6 +93,11 @@ static inline void getKnockValue()
   {
     knockCounter++; // used in 100 mS timer loop
   }
+DIAG1=REQUEST_LOW_BYTE;
+DIAG2=REQUEST_HIGH_BYTE;
+DIAG3=INT_GAIN_CMD | rpmModGain_idx;
+DIAG4=INT_TC_CMD | integrator_time_constant_idx;
+DIAG5=knockValue;
 }
 
 uint8_t getClosestIndex(int val, int array[], uint8_t sz)
@@ -149,4 +151,4 @@ uint8_t closestIndex(int idx1, int idx2, int array[], int reqVal)
 }
 
 
-#endif
+//#endif

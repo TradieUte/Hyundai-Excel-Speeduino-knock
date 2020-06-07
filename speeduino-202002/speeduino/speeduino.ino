@@ -306,11 +306,10 @@ void loop()
           } //Channel type
         } //For loop going through each channel
       } //aux channels are enabled
-
-#if defined (KNOCK)    
+#if defined(KNOCK)    
     if ((configPage10.knock_mode==KNOCK_MODE_DIGITAL) &&(currentStatus.hasSync))
     {
-      void refreshKnockParameters();
+      refreshKnockParameters();
     }
 #endif
 
@@ -319,16 +318,16 @@ void loop()
     {
       BIT_CLEAR(TIMER_mask, BIT_TIMER_1HZ);
       readBaro(); //Infrequent baro readings are not an issue.
-#if defined (DIAG)
+#if defined(DIAG)
     Serial1.printf("BRD %d CYL %d IGN %d INJ %d\n",configPage2.pinMapping,configPage2.nCylinders,configPage4.sparkMode,configPage2.injLayout);
-    if (DIAG1) {Serial1.printf("D1 %u\n",DIAG1);}
-    if (DIAG2) {Serial1.printf("D2 %u\n",DIAG2);}
-    if (DIAG3) {Serial1.printf("D3 %u\n",DIAG3);}
-    if (DIAG4) {Serial1.printf("D4 %u\n",DIAG4);}
-    if (DIAG5) {Serial1.printf("D5 %u\n",DIAG5);}
-    if (DIAG6) {Serial1.printf("D6 %u\n",DIAG6);}
-    if (DIAG7) {Serial1.printf("D7 %u\n",DIAG7);}
-    if (DIAG8) {Serial1.printf("D8 %u\n",DIAG8);}
+    if (DIAG1) {Serial1.printf("D1 %x\n",DIAG1);}
+    if (DIAG2) {Serial1.printf("D2 %x\n",DIAG2);}
+    if (DIAG3) {Serial1.printf("D3 %x\n",DIAG3);}
+    if (DIAG4) {Serial1.printf("D4 %x\n",DIAG4);}
+    if (DIAG5) {Serial1.printf("D5 %x\n",DIAG5);}
+    if (DIAG6) {Serial1.printf("D6 %x\n",DIAG6);}
+    if (DIAG7) {Serial1.printf("D7 %x\n",DIAG7);}
+    if (DIAG8) {Serial1.printf("D8 %x\n",DIAG8);}
     DIAG1=0;
     DIAG2=0;
     DIAG3=0;
@@ -338,15 +337,13 @@ void loop()
     DIAG7=0;
     DIAG8=0;
 #endif
-#if defined (CORE_TEENSY) //debug purpose, only visal for running code
+#if defined(CORE_TEENSY) //debug purpose, only visal for running code
     digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
 #endif
-
     } //1Hz timer
 
     if( (configPage6.iacAlgorithm == IAC_ALGORITHM_STEP_OL) || (configPage6.iacAlgorithm == IAC_ALGORITHM_STEP_CL) )  { idleControl(); } //Run idlecontrol every loop for stepper idle.
-
-    
+   
     //VE calculation was moved outside the sync/RPM check so that the fuel load value will be accurately shown when RPM=0
     currentStatus.VE1 = getVE1();
     currentStatus.VE = currentStatus.VE1; //Set the final VE value to be VE 1 as a default. This may be changed in the section belo
@@ -1486,4 +1483,9 @@ void calculateIgnitionAngles(int dwellAngle)
     default:
       break;
   }
+}
+
+void helloWorld()
+{
+  Serial1.println("hello world");
 }

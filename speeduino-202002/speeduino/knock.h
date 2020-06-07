@@ -1,14 +1,12 @@
 #ifndef KNOCK_H
 #define KNOCK_H
 
-#if defined (CORE_TEENSY)
 #include "globals.h"
 
 static inline void launchKnockWindow();
 static inline void getKnockValue();
 void initialiseKnock();
-uint8_t sendCmd(uint8_t);
-//static inline void getKnockValue();
+static inline uint8_t sendCmd(uint8_t);
 volatile int knock_threshold = 0;
 volatile bool knockRecoveryFirstStepDelay = false;
 // SPI commands for TPIC8101
@@ -63,5 +61,4 @@ int integratorGain = 0;
 volatile uint32_t knockWindowStartDelay = 0;  // uSec
 volatile uint32_t knockWindowDuration = 0;    // uSec
 void refreshKnockParameters(void);
-#endif
 #endif
