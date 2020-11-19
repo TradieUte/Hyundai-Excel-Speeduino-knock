@@ -47,13 +47,11 @@ void initialiseAll()
 
 #if defined(DIAG)
     if (configPage2.pinMapping==57) {Serial3.begin(115200);}
+    else if (configPage2.pinMapping==58){Serial1.begin(115200);}
 #endif
     Serial.begin(115200);
     if (configPage9.enable_secondarySerial == 1) { CANSerial.begin(115200); }
 
-#if defined(DIAG)
-    if (configPage2.pinMapping==58){Serial1.begin(115200);}
-#endif
     #if defined(CORE_STM32)
     configPage9.intcan_available = 1;   // device has internal canbus
     //STM32 can not currently enabled
@@ -242,7 +240,7 @@ void initialiseAll()
     // PIT clock - 60MHz - PIT counts down to 0 for interrupt
     tachPulseDuration =  (configPage2.tachoDuration * 1000 * 60) - 1; // pulse duration from TS, convert to uS (mS x 1000 x 60)
     // longest duration in uS for max revs at nCyl and 50% dc
-    maxCalcDuration = (60000000)/((rev_cutoff/60) * configPage2.nCylinders) - 1;
+    maxCalcDuration = 60000000/(((configPage4.HardRevLim*100)/60) * configPage2.nCylinders) - 1;
     if (maxCalcDuration < tachPulseDuration)
     {
       tachPulseDuration = maxCalcDuration;
@@ -1881,7 +1879,8 @@ void setPinMapping(byte boardID)
       pinFuelPump = 24; // Fuel pump output pin
       pinFan = 11;      // Fan output pin
       break;
- 
+
+      #ifdef USE_MC33810 
       case 58:
       //Pin mappings as per the teensy 3.5 FV6.0 board shield
       pinInjector1 = 5;
@@ -1929,7 +1928,70 @@ void setPinMapping(byte boardID)
       // MISO0 on D12
       // MOSI0 on D11
       break;    
-    #endif
+      #else
+      case 58:
+      //Pin mappings as per the teensy 3.5 Ford_Aux_V0_4 board shield
+      // pinInjector1 - OUT3 - U1
+      // pinInjector2 - OUT2 - U1
+      // pinInjector3 - OUT1 - U1
+      // pinInjector4 - OUT0 - U1
+      // pinInjector5 - OUT2 - U2
+      // pinInjector6 - OUT3 - U2
+      // pinInjector7 - OUT1 - U2
+      // pinInjector8 - OUT0 - U2
+      // pinVVT_1     - GD0 - U5
+      // pinVVT_2     - GD1 - U5      
+      // pinIMCC      - GD2 - U5
+      // X     - GD0 - U5
+      // pinFuelPump  - OUT3 - U5
+      // pinFan       - OUT2 - U5 
+      // X       - OUT2 - U5 
+      // X       - OUT2 - U5 
+      pinCoil1 = 30;
+      pinCoil2 = 32;
+      pinCoil3 = 33;
+      pinCoil4 = 31;
+      pinCoil5 = 34;
+      pinCoil6 = 36;
+      pinCoil7 = 35;
+      pinCoil8 = 37;      
+      pinTrigger = 18;  // CAS pin
+      pinTrigger2 = 27; // ECam Sensor pin
+      pinTrigger3 = 28; // ICam Sensor pin     
+      pinTPS = A2;      // 16 TPS input pin 
+      pinMAP = A5;      // 19 MAP sensor pin
+      pinIAT = A11;     // - IAT sensor pin
+      pinCLT = A10;     // - CLT sensor pin
+      pinO2 =  A4;      // 18 O2 sensor pin
+      pinO2_2 = A9;     // 23 O2-2 sensor pin
+      pinBat = A3;      // 17 Battery reference voltage pin
+      pinBaro = A26;    // - Baro sensor pin - ONLY WITH DB
+      pinTachOut = 2;   // Tacho output pin
+      pinBoost = 48;    // Boost control - pogo
+      pinLaunch = 25;   // Input
+      pinFlex = 15;     // Flex sensor (Must be external interrupt enabled)
+      pinKnockWin = 24; // Integrate/Hold for TPC8101
+      //Reserved pins on Teensy
+      // MISO0 on D12
+      // MOSI0 on D11
+      // MISO1 on D12
+      // MOSI1 on D21
+      // CS0_0 on D10   U1 MC33801
+      // CS0_1 on D9    U2 MC33801
+      // CS0_2 on D20   U5 MC33801
+      // CS0_3 on D22   U14 flash
+      // CS1_0 on D23   U16 TPIC8101
+      // CLK0  on D14
+      // CLK1  on D32
+      // CANTX on D3
+      // CANRX on D4
+      // RX    on D0
+      // TX    on D1
+
+      break;
+      #endif     
+      
+      #endif
 
    #if defined(ARDUINO_BLACK_F407VE)
     case 60:

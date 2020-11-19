@@ -7,9 +7,7 @@ A full copy of the license may be found in the projects root directory
 #include "globals.h"
 #include "scheduler.h"
 #include "scheduledIO.h"
-#if defined(CORE_TEENSY)
 #include "knock.h"
-#endif
 
 FuelSchedule fuelSchedule1;
 FuelSchedule fuelSchedule2;

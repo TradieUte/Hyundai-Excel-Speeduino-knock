@@ -1485,7 +1485,4 @@ void calculateIgnitionAngles(int dwellAngle)
   }
 }
 
-void helloWorld()
-{
-  Serial1.println("hello world");
-}
+

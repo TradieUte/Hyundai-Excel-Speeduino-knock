@@ -1,4 +1,4 @@
-//#if defined(KNOCK)
+#if defined(KNOCK)
 #include "knock.h"
 #include "globals.h"
 #include "sensors.h"
@@ -149,6 +149,4 @@ uint8_t closestIndex(int idx1, int idx2, int array[], int reqVal)
     return (idx2);
   }
 }
-
-
-//#endif
+#endif
