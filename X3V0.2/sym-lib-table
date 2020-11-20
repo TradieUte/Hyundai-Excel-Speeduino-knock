@@ -1,0 +1,5 @@
+(sym_lib_table
+  (lib (name excel)(type Legacy)(uri $HOME/projects/Source/ECM/excel/X3V0.2/excel.lib)(options "")(descr ""))
+  (lib (name teensy)(type Legacy)(uri $HOME/projects/Source/ECM/excel/X3V0.2/teensy_library/teensy.lib)(options "")(descr ""))
+  (lib (name X3V0_2-rescue)(type Legacy)(uri ${KIPRJMOD}/X3V0_2-rescue.lib)(options "")(descr ""))
+)
